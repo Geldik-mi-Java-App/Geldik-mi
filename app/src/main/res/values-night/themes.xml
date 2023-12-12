@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.LoginRegister" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:itemTextAppearance">@style/OptionsMenuTextAppearance</item>
+    </style>
+    <style name="OptionsMenuTextAppearance">
+        <item name="android:textColor">@color/design_default_color_primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="backgroundColor">#FFC107</item>
+    </style>
+</resources>
