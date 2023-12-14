@@ -1,6 +1,8 @@
 package com.oguzcanaygun.loginregister;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -10,15 +12,29 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.auth.User;
 import com.oguzcanaygun.loginregister.databinding.ActivityUserBinding;
+import com.squareup.picasso.Picasso;
 
 public class UserActivity extends AppCompatActivity {
 
     ActivityUserBinding binding;
-    FirebaseAuth auth;
+    private FirebaseAuth auth;
+    private FirebaseFirestore firebaseFirestore;
+    String userID;
+    String userName;
+    String email;
+    String profilePicUrl;
+    String password;
+    Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,9 +42,51 @@ public class UserActivity extends AppCompatActivity {
         binding = ActivityUserBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         auth = FirebaseAuth.getInstance();
-        Toolbar toolbar = binding.userToolbar.getRoot();
-        toolbar.setTitle("Kullanıcı Sayfası");
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        userID = auth.getUid();
+        getdata();
+
+        toolbar = binding.userToolbar.getRoot();
+        binding.userToolbar.circularImageView.setImageResource(R.drawable.no_pp_100);
+        binding.symbolView.setImageResource(R.drawable.no_pp_100);
         setSupportActionBar(toolbar);
+
+    }
+    public void getdata(){
+
+        DocumentReference documentReferenceDoc = firebaseFirestore.collection("UserInfo").document(userID);
+        DocumentReference documentReferencePic = firebaseFirestore.collection("ProfilePic").document(userID);
+        documentReferenceDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+           if (error!=null){
+               Toast.makeText(UserActivity.this, error.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+           }
+           if (value!=null && value.exists()){
+                userName = value.getString("username");
+                email = value.getString("email");
+                password = value.getString("password");
+               toolbar.setTitle(userName);
+               binding.textUserName.setText(userName);
+
+
+           }
+            }
+        });
+        documentReferencePic.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error!=null){
+                    Toast.makeText(UserActivity.this, error.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                }
+                if (value!=null && value.exists()){
+                    profilePicUrl = value.getString("imageUrl");
+                    Picasso.get().load(profilePicUrl).into(binding.symbolView);
+                    Picasso.get().load(profilePicUrl).into(binding.userToolbar.circularImageView);
+                }
+            }
+        });
 
     }
 
@@ -38,6 +96,7 @@ public class UserActivity extends AppCompatActivity {
         menuInflater.inflate(R.menu.option_menu,menu);
 
         return super.onCreateOptionsMenu(menu);
+
     }
 
     @Override

@@ -8,7 +8,27 @@
     android:background="@color/design_default_color_primary"
     android:elevation="4dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-
     >
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/circularImageView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerCrop"
+            android:clipToOutline="false"
+            xlmns:shapeAppearanceOverlay="@style/circular"
+            android:padding="2dp"
+            xlmns:strokeWidth="3dp"
+            xlmns:strokeColor="@color/white"
+            android:layout_marginEnd="36dp"
+             />
+
+    </FrameLayout>
+
 
 </androidx.appcompat.widget.Toolbar>
