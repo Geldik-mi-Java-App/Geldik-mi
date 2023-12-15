@@ -31,7 +31,7 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
 
-    User user = new User();
+    User user = new User(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -36,6 +36,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.oguzcanaygun.loginregister.databinding.ActivitySettingsBinding;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
     private FirebaseAuth auth;
-    User user = new User();
+    User user = new User(this);
 
     ActivityResultLauncher<Intent> activityResultLauncher;
     ActivityResultLauncher<String> permissionLauncher;
@@ -69,8 +70,10 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
         storageReference =firebaseStorage.getReference();
 
 
+
         auth = FirebaseAuth.getInstance();
         registerLauncher();
+        visualSet();
 
         List<Item> items= new ArrayList<Item>();
         items.add(new Item("Profil Foto",R.drawable.baseline_add_a_photo_24));
@@ -83,6 +86,19 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
         GridLayoutManager layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(new SettingsAdapter(this, getApplicationContext(),items));
+
+    }
+    public void visualSet(){
+        String imageUrl = user.getImageUrl(new User.ImageUrlCallback() {
+            @Override
+            public void onImageUrlReceived(String imageUrl) {
+                if (imageUrl==null){
+                    binding.settingsToolbar.circularImageView.setImageResource(R.drawable.no_pp_100);
+                } else {
+                    Picasso.get().load(imageUrl).into(binding.settingsToolbar.circularImageView);
+                }
+            }
+        });
 
     }
 
