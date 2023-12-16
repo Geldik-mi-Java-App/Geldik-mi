@@ -20,6 +20,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.auth.User;
 import com.oguzcanaygun.loginregister.databinding.ActivityUserBinding;
 import com.squareup.picasso.Picasso;
 
@@ -101,15 +102,9 @@ public class UserActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId()==R.id.add_alarm){
-<<<<<<< Updated upstream
         Intent intent = new Intent(UserActivity.this, MapAlarmAddActivity.class);
         startActivity(intent);
         finish();
-=======
-            Intent intent = new Intent(UserActivity.this, MapsActivity.class);
-            startActivity(intent);
-            finish();
->>>>>>> Stashed changes
         }
         else if (item.getItemId()==R.id.remove_alarm){
 

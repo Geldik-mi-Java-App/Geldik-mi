@@ -49,13 +49,9 @@ dependencies {
     implementation ("com.squareup.picasso:picasso:2.71828")
     implementation("com.google.android.material:material:1.10.0")
 <<<<<<< Updated upstream
-<<<<<<< Updated upstream
 =======
     implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.28")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
->>>>>>> Stashed changes
-=======
-    implementation("com.google.android.gms:play-services-maps:18.1.0")
 >>>>>>> Stashed changes
 
 

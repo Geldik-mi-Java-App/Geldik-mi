@@ -1,8 +1,4 @@
 <resources>
     <string name="app_name">LoginRegister</string>
-<<<<<<< Updated upstream
     <string name="title_activity_map_alarm_add">MapAlarmAddActivity</string>
-=======
-    <string name="title_activity_maps">MapsActivity</string>
->>>>>>> Stashed changes
 </resources>
