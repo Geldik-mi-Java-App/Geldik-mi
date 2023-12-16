@@ -102,7 +102,9 @@ public class UserActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId()==R.id.add_alarm){
-
+        Intent intent = new Intent(UserActivity.this, MapAlarmAddActivity.class);
+        startActivity(intent);
+        finish();
         }
         else if (item.getItemId()==R.id.remove_alarm){
 
