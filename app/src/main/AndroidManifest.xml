@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -30,6 +30,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAvEMpyPDVdAc99ez1cc9k1JbgqQ73i6g0" />
 
+<<<<<<< Updated upstream
+=======
+        <activity
+            android:name=".MapsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maps" />
+>>>>>>> Stashed changes
         <activity
             android:name=".MapAlarmAddActivity"
             android:exported="false"
