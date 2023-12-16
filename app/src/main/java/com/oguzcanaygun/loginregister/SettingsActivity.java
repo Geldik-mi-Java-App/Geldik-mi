@@ -49,9 +49,12 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
     private FirebaseAuth auth;
+    public Uri soundData;
+    private boolean snackbarShown = false;
     User user = new User(this);
 
     ActivityResultLauncher<Intent> activityResultLauncher;
+    private ActivityResultLauncher<Intent> activityResultLauncherForSound;
     ActivityResultLauncher<String> permissionLauncher;
     ActivitySettingsBinding binding;
     @Override
@@ -128,7 +131,9 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
     public void onItemClick(int position) {
         switch (position){
             case 0: selectImage(findViewById(android.R.id.content));
-
+                break;
+            case 1:
+                selectSound(findViewById(android.R.id.content));
                 break;
             default: break;
 
@@ -138,15 +143,11 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
-                Snackbar.make(view, "Galeriye Giriş İzni Gerekiyor",Snackbar.LENGTH_INDEFINITE).setAction("İzin Ver", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                    permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-                    }
-                }).show();
+                showPermissionSnackbar(view,"Galeriye Giriş izni isteniyor");
             }
             else {
-            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                showPermissionSnackbar(view, "Galeriye giriş izni gerekli");
+
             }
         }
         else {
@@ -154,6 +155,28 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
             activityResultLauncher.launch(intentToGallery);
         }
     }
+
+    public void selectSound(View view) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                showPermissionSnackbar(view, "Ses dosyalarına giriş izni gerekli");
+            } else {
+                showPermissionSnackbar(view, "Ses dosyalarına giriş izni gerekli");
+
+            }
+        } else {
+            Intent intentToSoundPicker = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            activityResultLauncherForSound.launch(intentToSoundPicker);
+        }
+    }
+
+    private void showPermissionSnackbar(View view, String message){
+        Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE).setAction("izin ver",v ->{
+            snackbarShown=true;
+            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+        } ).show();
+    }
+
     private void registerLauncher(){
         activityResultLauncher= registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
@@ -162,12 +185,6 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
                     Intent intentFromResult = result.getData();
                     if (intentFromResult!=null) {
                        imageData= intentFromResult.getData();
-
-                       /* Eğer hep tek resim yazdırmak istemiyorsak..
-                       * UUID uuid = UUID.randomUUID();
-                         String name=("images/"+uuid+".jpg");
-                       * referans olarak bu name'i kullanırsak her seferinde farklı dosyayı ekleme yapar
-                       *  */
 
                         String userID = auth.getUid();
 
@@ -196,25 +213,8 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
                                         Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                                         }
                                     });
-
-
-                                /*  firebaseFirestore.collection("Info").add(user.getUserData()).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                    @Override
-                                    public void onSuccess(DocumentReference documentReference) {
-                                    Intent intent = new Intent(SettingsActivity.this, UserActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(intent);
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                                    }
-                                });  */
-
                                 }
                             });
-
                            }
                        }).addOnFailureListener(new OnFailureListener() {
                            @Override
@@ -228,6 +228,47 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
                 }
             }
         });
+        activityResultLauncherForSound = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK) {
+                    Intent intentFromResult = result.getData();
+                    if (intentFromResult != null) {
+                        soundData = intentFromResult.getData();
+                        // URI burada onu alarm sesi olarak atayacağız sonra
+
+                        if (soundData != null) {
+                            String userID = auth.getUid();
+                            StorageReference soundReference = storageReference.child("sounds/profileSounds/" + userID + ".mp3");
+
+                            soundReference.putFile(soundData).addOnSuccessListener(taskSnapshot -> {
+
+                                soundReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String downloadURL = uri.toString();
+                                    user.setSoundUrl(downloadURL);
+
+                                    CollectionReference userInfoCollection = firebaseFirestore.collection("UserInfo");
+                                    userInfoCollection.document(userID).set(user.getUserData(), SetOptions.merge())
+                                            .addOnSuccessListener(aVoid -> {
+                                                // Handle success if needed
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                            });
+
+                                });
+                            }).addOnFailureListener(e -> {
+                                // Handle the failure of the upload
+                                Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                            });
+                            
+                        }
+                    }
+                }
+            }
+        });
+
+
         permissionLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
             @Override
             public void onActivityResult(Boolean o) {
@@ -237,9 +278,15 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
             }
             else {
                 Toast.makeText(SettingsActivity.this,"İzin Gerekli",Toast.LENGTH_LONG).show();
+                navigateToAppSettings();
             }
             }
         });
+    }
+    private void navigateToAppSettings() {
+        Intent settingsIntent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        settingsIntent.setData(Uri.parse("package:" + getPackageName()));
+        startActivity(settingsIntent);
     }
 
 }

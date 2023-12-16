@@ -37,6 +37,7 @@ public class User {
     public void setPassword(String password){
         userData.put("password", password);
     }
+    public void setSoundUrl(String soundUrl){userData.put("sound",soundUrl);}
     public void setImageUrl(String imageUrl){
         this.imageUrl =imageUrl;
         userData.put("imageUrl", this.imageUrl);
