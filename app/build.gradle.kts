@@ -47,6 +47,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation ("com.squareup.picasso:picasso:2.71828")
     implementation("com.google.android.material:material:1.10.0")
+    implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.28")
 
 
 

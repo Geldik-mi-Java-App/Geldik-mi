@@ -261,7 +261,7 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
                                 // Handle the failure of the upload
                                 Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                             });
-                            
+
                         }
                     }
                 }
