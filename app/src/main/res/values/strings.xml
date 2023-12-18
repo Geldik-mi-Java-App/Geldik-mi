@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">LoginRegister</string>
     <string name="title_activity_map_alarm_add">MapAlarmAddActivity</string>
+    <string name="open">Open Navigation Drawer</string>
+    <string name="close">Close Navigation Drawer</string>
+
 </resources>
