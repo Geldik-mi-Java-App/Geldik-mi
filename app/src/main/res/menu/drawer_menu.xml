@@ -6,11 +6,6 @@
         android:title="Geri Dön"
         android:icon="@drawable/baseline_login_24"
         />
-        <item
-            android:id="@+id/shareUS"
-            android:title="Paylaş"
-            android:icon="@drawable/baseline_share_24"
-            />
     </group>
     <item android:title="Hesabınız" >
         <menu>
@@ -33,5 +28,30 @@
             </group>
         </menu>
     </item>
-
+    <item android:title="Oturum Durumu" >
+        <menu>
+            <group>
+                <item
+                    android:id="@+id/backGround"
+                    android:title="ArkaPlanda Çalış"
+                    android:icon="@drawable/baseline_disabled_visible_24"
+                    />
+                <item
+                    android:id="@+id/logOut"
+                    android:title="Hesaptan Çık"
+                    android:icon="@drawable/baseline_no_accounts_24"
+                    />
+                <item
+                    android:id="@+id/exit"
+                    android:title="Uygulamayı Kapat"
+                    android:icon="@drawable/baseline_exit_to_app_24"
+                    />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/shareUS"
+        android:title="Paylaş"
+        android:icon="@drawable/baseline_share_24"
+        />
 </menu>

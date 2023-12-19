@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import com.oguzcanaygun.loginregister.R;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -41,8 +42,6 @@ public class UserActivity extends AppCompatActivity {
     String profilePicUrl;
     String password;
     Toolbar toolbar;
-    DrawerLayout drawerLayout;
-    NavigationView navigationView;
     ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,36 +64,45 @@ public class UserActivity extends AppCompatActivity {
         binding.drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setupNavigationDrawer();
+
+        int i = R.id.friends;
+        System.out.println(i);
+        System.out.println(R.id.exit);
+
+    }
+
+    public void setupNavigationDrawer(){
         binding.navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()){
-                    case 0:
-
-                        if (drawerLayout.isDrawerOpen(GravityCompat.START)){
-                            drawerLayout.closeDrawer(GravityCompat.START);
-                        }
-                        break;
-                    case 1:
-                        Toast.makeText(UserActivity.this, "Share Us selected",Toast.LENGTH_SHORT);
-                        break;
-                    case 2:
-                        Toast.makeText(UserActivity.this, "Friends selected",Toast.LENGTH_SHORT);
-                        break;
-                    case 3:
-                        Toast.makeText(UserActivity.this, "Alarms selected",Toast.LENGTH_SHORT);
-                        break;
-                    case 4:
-                        Toast.makeText(UserActivity.this, "Chat selected",Toast.LENGTH_SHORT);
-                        break;
+                View dummyView = new View(UserActivity.this);
+                if (item.getItemId()==R.id.turnBack){
+                    if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)){
+                        binding.drawerLayout.closeDrawer(GravityCompat.START);
+                    }
                 }
+                else if (item.getItemId()==R.id.shareUS){
 
+                }
+                else if (item.getItemId()==R.id.friends){
+
+                }
+                else if (item.getItemId()==R.id.alarms){
+
+                }
+                else if (item.getItemId()==R.id.chatArchive){
+
+                }
+                else if (item.getItemId()==R.id.backGround){
+
+                }
+                else if (item.getItemId()==R.id.logOut){logOutClicked(dummyView);}
+                else if (item.getItemId()==R.id.exit){System.exit(0);}
                 return false;
             }
         });
-
-
     }
 
     public void getdata(){
