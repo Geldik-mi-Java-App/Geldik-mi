@@ -65,6 +65,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <LinearLayout
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="160dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/symbolView"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ExpandableListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/expandableListView"
+
+            >
+
+        </ExpandableListView>
+
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
     <com.google.android.material.navigation.NavigationView

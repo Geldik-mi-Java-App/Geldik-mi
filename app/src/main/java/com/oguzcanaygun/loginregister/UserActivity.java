@@ -18,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
@@ -31,6 +33,11 @@ import com.google.firebase.firestore.auth.User;
 import com.oguzcanaygun.loginregister.databinding.ActivityUserBinding;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class UserActivity extends AppCompatActivity {
 
     ActivityUserBinding binding;
@@ -43,6 +50,13 @@ public class UserActivity extends AppCompatActivity {
     String password;
     Toolbar toolbar;
     ActionBarDrawerToggle actionBarDrawerToggle;
+
+    List<String> groupList;
+    List<String> childList;
+    Map<String, List<String>> mobileCollection;
+    ExpandableListView expandableListView;
+    ExpandableListAdapter expandableListAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +74,33 @@ public class UserActivity extends AppCompatActivity {
         binding.symbolView.setImageResource(R.drawable.no_pp_100);
         setSupportActionBar(toolbar);
 
+        createGroupList();
+        createCollection();
+        expandableListView= findViewById(R.id.expandableListView);
+        expandableListAdapter = new MyExpandableListAdapter(this, groupList,mobileCollection);
+        expandableListView.setAdapter(expandableListAdapter);
+        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            int lastExpandedPosition =-1;
+            @Override
+            public void onGroupExpand(int groupPosition) {
+            if (lastExpandedPosition!=-1 && groupPosition!= lastExpandedPosition){
+                expandableListView.collapseGroup(lastExpandedPosition);
+            }
+            lastExpandedPosition=groupPosition;
+            }
+        });
+        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                String selected = expandableListAdapter.getChild(groupPosition,childPosition).toString();
+                Toast.makeText(getApplicationContext(),selected+" Seçildi", Toast.LENGTH_LONG).show();
+
+
+                return true;
+            }
+        });
+
+
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,binding.drawerLayout,R.string.open,R.string.close);
         binding.drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
@@ -69,6 +110,46 @@ public class UserActivity extends AppCompatActivity {
         int i = R.id.friends;
         System.out.println(i);
         System.out.println(R.id.exit);
+
+    }
+
+    private void createCollection() {
+        String[] istanbul ={"Sancaktepe", "Şişli", "Ümraniye", "Esenyurt", "Sultanbeyli"};
+        String[] izmir={"Bornova", "Alsancak", "Karşıyaka", "Çiğli", "Buca"};
+        String [] corlu={"Kemalettin", "Reşadiye", "Kore", "Merkez", "Emlaklar"};
+        String [] maraş={"Elbistan", "Afşin", "Pazarcık", "Ceyhan", "Andırın"};
+        mobileCollection = new HashMap<String, List<String>>();
+        for (String group: groupList){
+            if (group.equals("İstanbul")) {
+                loadChild(istanbul);}
+            else if (group.equals("İzmir")) {
+                loadChild(izmir);
+            } else if (group.equals("Çorlu")) {
+                loadChild(corlu);
+            }else {
+                loadChild(maraş);
+            }
+            mobileCollection.put(group,childList);
+
+        }}
+
+    private void loadChild(String[] strings) {
+    childList= new ArrayList<>();
+    for (String model: strings){
+        childList.add(model);
+    }
+
+
+    }
+
+
+    private void createGroupList() {
+    groupList = new ArrayList<>();
+    groupList.add("İstanbul");
+    groupList.add("İzmir");
+    groupList.add("Çorlu");
+    groupList.add("Maraş");
+
 
     }
 
