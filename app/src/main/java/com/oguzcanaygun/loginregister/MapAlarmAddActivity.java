@@ -46,6 +46,8 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
     private Circle circle;
     String[] locationPermissions;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private int intentRadius;
+    private LatLng intentLatlng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +140,8 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         if (circle != null) {
             circle.remove();
         }
+        intentRadius=radius;
+        intentLatlng=latLng;
         int strokeColor = getResources().getColor(R.color.colorRed, getTheme());
         int fillColor = getResources().getColor(R.color.redTransparent, getTheme());
         circle = mMap.addCircle(new CircleOptions()
@@ -244,6 +248,47 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         Intent intent = new Intent(MapAlarmAddActivity.this, UserActivity.class);
         startActivity(intent);
         finish();
+   }
+   public void sendAlarm(View view){
+        if (circle!=null) {
+
+            Intent intent = new Intent(MapAlarmAddActivity.this, UserActivity.class);
+            intent.putExtra("radius", intentRadius);
+            intent.putExtra("latlng", intentLatlng);
+
+            final EditText nameInput = new EditText(this);
+            nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+
+            new AlertDialog.Builder(this)
+                    .setTitle("kaydedeceğiniz alarmın adını belirtiniz")
+                    .setView(nameInput)
+                    .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String alarmNameStr = nameInput.getText().toString();
+                            if (!alarmNameStr.isEmpty()) {
+                            intent.putExtra("alarm_ismi", alarmNameStr);
+                            startActivity(intent);
+                            finish();
+
+                            } else {
+                                Toast.makeText(getApplicationContext(),"Geçerli bir alarm ismi belirtiniz",Toast.LENGTH_SHORT).show();
+                            }
+
+
+                        }
+                    })
+                    .setNegativeButton("İptal", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .show();
+
+        } else if (circle==null) {
+            Toast.makeText(this,"Lütfen önce ulaşmak istediğiniz alanı belirleyiniz",Toast.LENGTH_SHORT).show();
+        }
    }
 
 }

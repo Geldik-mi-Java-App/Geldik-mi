@@ -12,8 +12,6 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.location.Priority;
-
 import java.util.List;
 import java.util.Map;
 
@@ -23,39 +21,32 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
     private Map<String, List<String>> mobileCollection;
     private List<String> groupList;
 
-    public MyExpandableListAdapter(Context context, List<String> groupList, Map<String, List<String>> mobileCollection){
-        this.context=context;
-        this.groupList=groupList;
-        this.mobileCollection=mobileCollection;
-
-
+    public MyExpandableListAdapter(Context context, List<String> groupList, Map<String, List<String>> mobileCollection) {
+        this.context = context;
+        this.groupList = groupList;
+        this.mobileCollection = mobileCollection;
     }
+
     @Override
     public int getGroupCount() {
-        return mobileCollection.size();
+        return groupList != null ? groupList.size() : 0;
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        List<String> children = mobileCollection.get(groupList.get(groupPosition));
-        if (children == null) {
-            Log.e("MyExpandableListAdapter", "Children list is null for group position: " + groupPosition);
-            return 0;
-        } else {
-            Log.d("MyExpandableListAdapter", "Children list size for group position " + groupPosition + ": " + children.size());
-            return children.size();
-        }
-        //return mobileCollection.get(groupList.get(groupPosition)).size();
+        List<String> children = mobileCollection != null ? mobileCollection.get(groupList.get(groupPosition)) : null;
+        return children != null ? children.size() : 0;
     }
 
     @Override
     public Object getGroup(int groupPosition) {
-        return groupList.get(groupPosition);
+        return groupList != null ? groupList.get(groupPosition) : null;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return mobileCollection.get(groupList.get(groupPosition)).get(childPosition);
+        List<String> children = mobileCollection != null ? mobileCollection.get(groupList.get(groupPosition)) : null;
+        return children != null ? children.get(childPosition) : null;
     }
 
     @Override
@@ -70,16 +61,15 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public boolean hasStableIds() {
-
         return true;
     }
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        String mobileName= groupList.get(groupPosition);
-        if (convertView==null){
-            LayoutInflater inflater =(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView=inflater.inflate(R.layout.group_item,null);
+        String mobileName = (String) getGroup(groupPosition);
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.group_item, null);
         }
         TextView item = convertView.findViewById(R.id.city);
         item.setTypeface(null, Typeface.BOLD);
@@ -89,13 +79,13 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        String model= getChild(groupPosition,childPosition).toString();
-        if (convertView==null){
-            LayoutInflater inflater =(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView=inflater.inflate(R.layout.child_item,null);
+        String model = (String) getChild(groupPosition, childPosition);
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.child_item, null);
         }
-        TextView item= convertView.findViewById(R.id.child_item);
-        ImageView delete= convertView.findViewById(R.id.delete_image);
+        TextView item = convertView.findViewById(R.id.child_item);
+        ImageView delete = convertView.findViewById(R.id.delete_image);
         item.setText(model);
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,10 +96,11 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                 builder.setPositiveButton("Evet", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        List<String>child = mobileCollection.get(groupList.get(groupPosition));
-                        child.remove(childPosition);
-                        notifyDataSetChanged();
-
+                        List<String> child = mobileCollection != null ? mobileCollection.get(groupList.get(groupPosition)) : null;
+                        if (child != null) {
+                            child.remove(childPosition);
+                            notifyDataSetChanged();
+                        }
                     }
                 });
                 builder.setNegativeButton("Hayır", new DialogInterface.OnClickListener() {
@@ -118,12 +109,11 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                         dialog.cancel();
                     }
                 });
-                AlertDialog alertDialog =builder.create();
+                AlertDialog alertDialog = builder.create();
                 alertDialog.show();
             }
         });
         return convertView;
-
     }
 
     @Override

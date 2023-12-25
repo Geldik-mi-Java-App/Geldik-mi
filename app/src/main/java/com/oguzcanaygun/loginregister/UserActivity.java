@@ -8,11 +8,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.CollectionReference;
 import com.oguzcanaygun.loginregister.R;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,7 +44,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserActivity extends AppCompatActivity {
+public class UserActivity extends AppCompatActivity implements UserIdCallback {
+
+
+
 
     ActivityUserBinding binding;
     private FirebaseAuth auth;
@@ -52,10 +61,11 @@ public class UserActivity extends AppCompatActivity {
     ActionBarDrawerToggle actionBarDrawerToggle;
 
     List<String> groupList;
-    List<String> childList;
+    List<HashMap<String, Object>> childList;
     Map<String, List<String>> mobileCollection;
     ExpandableListView expandableListView;
     ExpandableListAdapter expandableListAdapter;
+    ArrayList<String> alarmisimler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,16 +76,29 @@ public class UserActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
 
+        alarmisimler= new ArrayList<String>();
+
         userID = auth.getUid();
-        getdata();
+        System.out.println(userID);
+        if (userID==null){
+            retrieveUserID(this);
+        }
+        else {
+            getdata();
+            createGroupList();
+            createCollection();
+        }
+
+
 
         toolbar = binding.userToolbar.getRoot();
         binding.userToolbar.circularImageView.setImageResource(R.drawable.no_pp_100);
         binding.symbolView.setImageResource(R.drawable.no_pp_100);
         setSupportActionBar(toolbar);
 
-        createGroupList();
-        createCollection();
+
+
+
         expandableListView= findViewById(R.id.expandableListView);
         expandableListAdapter = new MyExpandableListAdapter(this, groupList,mobileCollection);
         expandableListView.setAdapter(expandableListAdapter);
@@ -92,8 +115,15 @@ public class UserActivity extends AppCompatActivity {
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                String selected = expandableListAdapter.getChild(groupPosition,childPosition).toString();
-                Toast.makeText(getApplicationContext(),selected+" Seçildi", Toast.LENGTH_LONG).show();
+                Object selectedObject = expandableListAdapter.getChild(groupPosition, childPosition);
+
+                if (selectedObject != null) {
+                    String selected = selectedObject.toString();
+                    Toast.makeText(getApplicationContext(), selected + " Seçildi", Toast.LENGTH_LONG).show();
+                } else {
+                    // Handle the case where selectedObject is null
+                    Toast.makeText(getApplicationContext(), "Null object selected", Toast.LENGTH_LONG).show();
+                }
 
 
                 return true;
@@ -112,43 +142,115 @@ public class UserActivity extends AppCompatActivity {
         System.out.println(R.id.exit);
 
     }
+    @Override
+    public void onUserIdReceived(String userID) {
+        Log.d("UserActivity", "Received userID: " + userID);
+        this.userID=userID;
+        getdata();
+        createCollection();
+    }
 
-    private void createCollection() {
-        String[] istanbul ={"Sancaktepe", "Şişli", "Ümraniye", "Esenyurt", "Sultanbeyli"};
-        String[] izmir={"Bornova", "Alsancak", "Karşıyaka", "Çiğli", "Buca"};
-        String [] corlu={"Kemalettin", "Reşadiye", "Kore", "Merkez", "Emlaklar"};
-        String [] maraş={"Elbistan", "Afşin", "Pazarcık", "Ceyhan", "Andırın"};
-        mobileCollection = new HashMap<String, List<String>>();
-        for (String group: groupList){
-            if (group.equals("İstanbul")) {
-                loadChild(istanbul);}
-            else if (group.equals("İzmir")) {
-                loadChild(izmir);
-            } else if (group.equals("Çorlu")) {
-                loadChild(corlu);
-            }else {
-                loadChild(maraş);
-            }
-            mobileCollection.put(group,childList);
+    public void retrieveUserID(UserIdCallback callback){
+        String uid = auth.getUid();
+        if (uid == null) {
+            // Handle the case where the user ID is null
+            Toast.makeText(UserActivity.this, "User ID is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        }}
+        DocumentReference userDocRef = firebaseFirestore.collection("UserInfo").document(auth.getUid());
 
-    private void loadChild(String[] strings) {
-    childList= new ArrayList<>();
-    for (String model: strings){
-        childList.add(model);
+        // Fetch the document
+        userDocRef.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            // If the document exists, get the userID and notify the callback
+                            String userID = document.getId();
+                            callback.onUserIdReceived(userID);
+                        } else {
+                            // Handle the case where the document does not exist
+                            Toast.makeText(UserActivity.this, "User document does not exist", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Handle exceptions or errors during the document fetch
+                        Toast.makeText(UserActivity.this, "Error fetching user document: " + task.getException(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
     }
 
 
+    private void createCollection() {
+        if (userID == null) {
+            // Handle the case where userID is null
+            Toast.makeText(UserActivity.this, "User ID is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = getIntent();
+        String alarm = intent.getStringExtra("alarm_ismi");
+        int radius = intent.getIntExtra("radius", 0);
+        LatLng latLng = intent.getParcelableExtra("latlng");
+
+        if (alarm == null || latLng == null) {
+            // Handle the case where alarm or latLng is null
+            Toast.makeText(UserActivity.this, "Alarm or LatLng is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        alarmisimler.add(alarm);
+
+        HashMap<String, Object> alarmDetay = new HashMap<>();
+        alarmDetay.put("latlng", latLng);
+        alarmDetay.put("radius", radius);
+
+        mobileCollection = new HashMap<>();
+        for (String group : groupList) {
+            if (group.equals("Alarmlar")) {
+                loadChild(alarmDetay);
+            }
+
+            mobileCollection.put(group, alarmisimler);
+        }
+
+        HashMap<String, Object> alarmDetails = new HashMap<>();
+        alarmDetails.put("alarmName", alarm);
+        alarmDetails.put("radius", radius);
+        alarmDetails.put("latlng", latLng);
+
+        DocumentReference alarmlarDocRef = firebaseFirestore.collection("Alarmlar").document(userID);
+
+        if (alarmlarDocRef == null) {
+            // Handle the case where alarmlarDocRef is null
+            Toast.makeText(UserActivity.this, "Alarmlar Document Reference is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        CollectionReference alarmsCollectionRef = alarmlarDocRef.collection("Alarms");
+        alarmsCollectionRef.document(alarm)
+                .set(alarmDetails)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getApplicationContext(), "Alarm Kaydı Başarılı", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getApplicationContext(), "Alarm kaydı başarısız: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void loadChild(HashMap<String, Object> alarmDetay) {
+
+        if (childList==null)
+        {childList= new ArrayList<>();}
+        childList.add(alarmDetay);
     }
 
 
     private void createGroupList() {
     groupList = new ArrayList<>();
-    groupList.add("İstanbul");
-    groupList.add("İzmir");
-    groupList.add("Çorlu");
-    groupList.add("Maraş");
+    groupList.add("Alarmlar");
+
 
 
     }

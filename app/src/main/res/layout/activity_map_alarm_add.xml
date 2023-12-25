@@ -14,17 +14,48 @@
         android:layout_width="match_parent"
         android:layout_height="582dp"
         tools:context=".MapAlarmAddActivity" />
-    
-    <Button
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/backButtonCardView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="geri dön"
-        android:id="@+id/BackButton"
-        android:onClick="backButton"
         android:layout_below="@+id/map"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        ></Button>
+        android:layout_marginTop="17dp"
+        android:layout_marginLeft="50dp"
+        app:cardCornerRadius="8dp">
+
+        <Button
+            android:id="@+id/BackButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/design_default_color_primary"
+            android:onClick="backButton"
+            android:text="Geri Dön"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Save Alarm Button -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/saveAlarmCardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/map"
+        android:layout_marginTop="14dp"
+        android:layout_marginLeft="220dp"
+        android:layout_marginRight="20dp"
+        app:cardCornerRadius="8dp">
+
+        <Button
+            android:id="@+id/alarmSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/design_default_color_primary"
+            android:onClick="sendAlarm"
+            android:text="Alarmı Kaydet"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </androidx.cardview.widget.CardView>
 
 
 </RelativeLayout>
