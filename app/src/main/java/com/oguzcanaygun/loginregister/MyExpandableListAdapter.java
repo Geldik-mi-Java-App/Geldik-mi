@@ -12,19 +12,24 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.List;
 import java.util.Map;
 
 public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
-    private Map<String, List<String>> mobileCollection;
+    private Map<String, List<Alarm>> alarmCollection;
     private List<String> groupList;
 
-    public MyExpandableListAdapter(Context context, List<String> groupList, Map<String, List<String>> mobileCollection) {
+    public MyExpandableListAdapter(Context context, List<String> groupList, Map<String, List<Alarm>> alarmCollection) {
         this.context = context;
         this.groupList = groupList;
-        this.mobileCollection = mobileCollection;
+        this.alarmCollection = alarmCollection;
     }
 
     @Override
@@ -34,8 +39,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        List<String> children = mobileCollection != null ? mobileCollection.get(groupList.get(groupPosition)) : null;
-        return children != null ? children.size() : 0;
+        List<Alarm> alarms = alarmCollection != null ? alarmCollection.get(groupList.get(groupPosition)) : null;
+        return alarms != null ? alarms.size() : 0;
     }
 
     @Override
@@ -45,8 +50,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        List<String> children = mobileCollection != null ? mobileCollection.get(groupList.get(groupPosition)) : null;
-        return children != null ? children.get(childPosition) : null;
+        List<Alarm> alarms = alarmCollection != null ? alarmCollection.get(groupList.get(groupPosition)) : null;
+        return alarms != null ? alarms.get(childPosition) : null;
     }
 
     @Override
@@ -79,14 +84,17 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        String model = (String) getChild(groupPosition, childPosition);
+        Alarm alarm = (Alarm) getChild(groupPosition, childPosition);
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.child_item, null);
         }
         TextView item = convertView.findViewById(R.id.child_item);
         ImageView delete = convertView.findViewById(R.id.delete_image);
-        item.setText(model);
+
+        // Display only the alarm name in the child view
+        item.setText(alarm.getAlarmName());
+
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,10 +104,19 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                 builder.setPositiveButton("Evet", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        List<String> child = mobileCollection != null ? mobileCollection.get(groupList.get(groupPosition)) : null;
-                        if (child != null) {
-                            child.remove(childPosition);
+                        String groupKey = groupList.get(groupPosition);
+
+                        List<Alarm> alarms = alarmCollection != null ? alarmCollection.get(groupKey) : null;
+                        if (alarms != null && childPosition < alarms.size()) {
+                            Alarm deletedAlarm = alarms.remove(childPosition);
+
+                            // Notify the adapter about the data change
                             notifyDataSetChanged();
+
+                            // Delete the alarm from Firebase Firestore
+                            if (deletedAlarm != null) {
+                                deleteAlarmFromFirestore(groupKey, deletedAlarm);
+                            }
                         }
                     }
                 });
@@ -114,6 +131,27 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
             }
         });
         return convertView;
+    }
+    private void deleteAlarmFromFirestore(String groupKey, Alarm deletedAlarm) {
+        if (groupKey != null && deletedAlarm != null) {
+            // Update the Firebase Firestore
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            FirebaseAuth auth= FirebaseAuth.getInstance();
+            String userId = auth.getUid();
+
+            DocumentReference alarmlarDocRef = firebaseFirestore.collection("Alarmlar").document(userId);
+            CollectionReference alarmsCollectionRef = alarmlarDocRef.collection("Alarms");
+
+            // Delete the alarm document from Firestore
+            alarmsCollectionRef.document(deletedAlarm.getAlarmName())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("MyExpandableListAdapter", "Alarm deleted from Firestore: " + deletedAlarm.getAlarmName());
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("MyExpandableListAdapter", "Error deleting alarm from Firestore: " + e.getLocalizedMessage());
+                    });
+        }
     }
 
     @Override

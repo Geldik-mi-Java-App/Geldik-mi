@@ -1,25 +1,21 @@
 package com.oguzcanaygun.loginregister;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.CollectionReference;
-import com.oguzcanaygun.loginregister.R;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,7 +31,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.auth.User;
 import com.oguzcanaygun.loginregister.databinding.ActivityUserBinding;
 import com.squareup.picasso.Picasso;
 
@@ -61,11 +56,16 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
     ActionBarDrawerToggle actionBarDrawerToggle;
 
     List<String> groupList;
-    List<HashMap<String, Object>> childList;
-    Map<String, List<String>> mobileCollection;
+    Map<String, List<Alarm>> alarmCollection = new HashMap<>();
+
     ExpandableListView expandableListView;
-    ExpandableListAdapter expandableListAdapter;
+    MyExpandableListAdapter expandableListAdapter;
     ArrayList<String> alarmisimler;
+    private static List<Alarm> alarmList;
+    private List<String> namesList = new ArrayList<>();
+    private List<Double> latitudeList = new ArrayList<>();
+    private List<Double> longitudeList = new ArrayList<>();
+    private List<Double> radiusList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +77,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
         firebaseFirestore = FirebaseFirestore.getInstance();
 
         alarmisimler= new ArrayList<String>();
+        alarmList= new ArrayList<>();
 
         userID = auth.getUid();
         System.out.println(userID);
@@ -85,6 +86,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
         }
         else {
             getdata();
+            getAlarmData();
             createGroupList();
             createCollection();
         }
@@ -100,7 +102,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
 
 
         expandableListView= findViewById(R.id.expandableListView);
-        expandableListAdapter = new MyExpandableListAdapter(this, groupList,mobileCollection);
+        expandableListAdapter = new MyExpandableListAdapter(this, groupList, alarmCollection);
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             int lastExpandedPosition =-1;
@@ -115,8 +117,34 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Object selectedObject = expandableListAdapter.getChild(groupPosition, childPosition);
+                String selectedGroup = groupList.get(groupPosition);
 
+                if (alarmCollection.containsKey(selectedGroup)) {
+                    List<Alarm> alarmsInGroup = alarmCollection.get(selectedGroup);
+
+                    if (alarmsInGroup != null && childPosition < alarmsInGroup.size()) {
+                        Alarm selectedAlarm = alarmsInGroup.get(childPosition);
+
+                        String toastMessage = "Alarm Adı: " + selectedAlarm.getAlarmName() +
+                                "\nEnlem: " + selectedAlarm.getLatitude() +
+                                "\nBoylam: " + selectedAlarm.getLongitude() +
+                                "\nÇap: " + selectedAlarm.getRadius();
+
+                        Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
+                    } else {
+                        // Handle the case where the alarmsInGroup is null or the index is out of bounds
+                        Toast.makeText(getApplicationContext(), "Invalid selection", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    // Handle the case where the selectedGroup is not in alarmCollection
+                    Toast.makeText(getApplicationContext(), "Invalid group selection", Toast.LENGTH_LONG).show();
+                }
+
+                return true;
+
+
+
+            /*    Object selectedObject = expandableListAdapter.getChild(groupPosition, childPosition);
                 if (selectedObject != null) {
                     String selected = selectedObject.toString();
                     Toast.makeText(getApplicationContext(), selected + " Seçildi", Toast.LENGTH_LONG).show();
@@ -126,7 +154,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
                 }
 
 
-                return true;
+                return true;   */
             }
         });
 
@@ -183,67 +211,82 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
 
 
     private void createCollection() {
+        Log.d("UserActivity", "Creating collection for user: " + userID);
         if (userID == null) {
-            // Handle the case where userID is null
             Toast.makeText(UserActivity.this, "User ID is null", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Intent intent = getIntent();
-        String alarm = intent.getStringExtra("alarm_ismi");
+        String alarmName = intent.getStringExtra("alarm_ismi");
         int radius = intent.getIntExtra("radius", 0);
         LatLng latLng = intent.getParcelableExtra("latlng");
 
-        if (alarm == null || latLng == null) {
-            // Handle the case where alarm or latLng is null
+        if (alarmName == null || latLng == null) {
             Toast.makeText(UserActivity.this, "Alarm or LatLng is null", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        alarmisimler.add(alarm);
+        // Create an Alarm object
+        Alarm newAlarm = new Alarm(alarmName, latLng.latitude, latLng.longitude, radius);
 
-        HashMap<String, Object> alarmDetay = new HashMap<>();
-        alarmDetay.put("latlng", latLng);
-        alarmDetay.put("radius", radius);
+        // Add the new alarm to the list
+        alarmList.add(newAlarm);
 
-        mobileCollection = new HashMap<>();
-        for (String group : groupList) {
-            if (group.equals("Alarmlar")) {
-                loadChild(alarmDetay);
-            }
+        // Update the mobile collection for the "Alarmlar" group
+        loadChild(newAlarm);
 
-            mobileCollection.put(group, alarmisimler);
+        if (alarmCollection == null) {
+            alarmCollection = new HashMap<>();
         }
 
-        HashMap<String, Object> alarmDetails = new HashMap<>();
-        alarmDetails.put("alarmName", alarm);
-        alarmDetails.put("radius", radius);
-        alarmDetails.put("latlng", latLng);
+        if (!alarmCollection.containsKey("Alarmlar")) {
+            alarmCollection.put("Alarmlar", new ArrayList<>());
+        }
 
+        // Add the new alarm to the list
+        alarmList.add(newAlarm);
+
+        // Update the mobile collection for the "Alarmlar" group
+        loadChild(newAlarm);
+
+        // Update the Firebase Firestore
         DocumentReference alarmlarDocRef = firebaseFirestore.collection("Alarmlar").document(userID);
-
-        if (alarmlarDocRef == null) {
-            // Handle the case where alarmlarDocRef is null
-            Toast.makeText(UserActivity.this, "Alarmlar Document Reference is null", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         CollectionReference alarmsCollectionRef = alarmlarDocRef.collection("Alarms");
-        alarmsCollectionRef.document(alarm)
-                .set(alarmDetails)
+
+        alarmsCollectionRef.document(alarmName)
+                .set(newAlarm.toMap())
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getApplicationContext(), "Alarm Kaydı Başarılı", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getApplicationContext(), "Alarm kaydı başarısız: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 });
+
+        // Notify the adapter about the data change
+        if (expandableListAdapter != null) {
+            expandableListAdapter.notifyDataSetChanged();
+            Log.d("UserActivity", "Collection created successfully");
+        }
     }
 
-    private void loadChild(HashMap<String, Object> alarmDetay) {
+    private void loadChild(Alarm alarm) {
+        if (alarmCollection == null) {
+            alarmCollection = new HashMap<>();
+        }
 
-        if (childList==null)
-        {childList= new ArrayList<>();}
-        childList.add(alarmDetay);
+        if (alarmCollection.containsKey("Alarmlar")) {
+            List<Alarm> alarms = alarmCollection.get("Alarmlar");
+            if (alarms == null) {
+                alarms = new ArrayList<>();
+                alarmCollection.put("Alarmlar", alarms);
+            }
+            alarms.add(alarm);
+        }
+
+        if (expandableListAdapter != null) {
+            expandableListAdapter.notifyDataSetChanged();
+        }
     }
 
 
@@ -324,6 +367,81 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
         });
 
     }
+    public void getAlarmData(){
+        Log.d("UserActivity", "Getting alarm data for user: " + userID);
+
+        String userId = userID;
+        String path = "Alarmlar/" + userId + "/Alarms";
+
+        CollectionReference collectionReference = firebaseFirestore.collection(path);
+
+        collectionReference.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            Log.d("UserActivity", "Query snapshot size: " + querySnapshot.size());
+
+                            // Clear existing lists before updating with new data
+                            namesList.clear();
+                            latitudeList.clear();
+                            longitudeList.clear();
+                            radiusList.clear();
+
+                            for (QueryDocumentSnapshot document : querySnapshot) {
+                                // Update lists with alarm information
+                                namesList.add(document.getString("alarmName"));
+                                latitudeList.add(document.getDouble("latitude"));
+                                longitudeList.add(document.getDouble("longitude"));
+                                radiusList.add(document.getDouble("radius"));
+                            }
+
+                            // Create Alarm objects and add them to the alarmCollection
+                            List<Alarm> alarms = new ArrayList<>();
+                            for (int i = 0; i < namesList.size(); i++) {
+                                String name = namesList.get(i);
+                                double latitude = latitudeList.get(i);
+                                double longitude = longitudeList.get(i);
+                                double radius = radiusList.get(i);
+
+                                Alarm alarm = new Alarm(name, latitude, longitude, radius);
+                                alarms.add(alarm);
+                            }
+
+                            // Update the alarmCollection with the new alarms
+                            alarmCollection.put("Alarmlar", alarms);
+
+                            Log.d("UserActivity", "Alarm data retrieval successful");
+                            // Notify the adapter after processing all documents
+                            if (expandableListAdapter != null) {
+                                expandableListAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    } else {
+                        Log.e("UserActivity", "Error getting documents: " + task.getException());
+                    }
+                });
+
+    }
+    private void processDocument(QueryDocumentSnapshot document){
+        Log.d("UserActivity", "Processing Firestore document: " + document.getId());
+        String alarmName = document.getString("alarmName");
+        Double latitude = document.getDouble("latitude");
+        Double longitude = document.getDouble("longitude");
+        Double radius = document.getDouble("radius");
+
+        if (alarmName != null && latitude != null && longitude != null && radius != null) {
+            Alarm alarm = new Alarm(alarmName, latitude, longitude, radius);
+            alarmList.add(alarm);
+            loadChild(alarm);
+            Log.d("UserActivity", "Alarm added: " + alarm.toString());
+        } else {
+            Log.e("UserActivity", "Invalid data in Firestore document");
+        }
+
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
