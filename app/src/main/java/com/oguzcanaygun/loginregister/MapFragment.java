@@ -133,8 +133,7 @@ public class MapFragment extends Fragment {
             supportMapFragment.getMapAsync(callback);
         }
 
-        Button findLocationButton = view.findViewById(R.id.findLocationButton);
-        findLocationButton.setOnClickListener(v -> findUserLocation());
+
 
         return view;
     }

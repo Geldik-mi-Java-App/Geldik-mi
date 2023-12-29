@@ -19,10 +19,10 @@
 
         <!-- Button to find user's location -->
         <Button
-            android:id="@+id/findLocationButton"
+            android:id="@+id/setTheAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
-            android:text="Konumumu İşaretle"/>
+            android:text="Alarmı Başlat"/>
     </LinearLayout>
 </FrameLayout>
