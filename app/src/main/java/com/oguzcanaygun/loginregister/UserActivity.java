@@ -335,6 +335,8 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
                 }
                 else if (item.getItemId()==R.id.backGround){
+                startBackGroundService(dummyView);
+
 
                 }
                 else if (item.getItemId()==R.id.logOut){logOutClicked(dummyView);}
@@ -342,6 +344,11 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
                 return false;
             }
         });
+    }
+    public void startBackGroundService(View view){
+        Intent serviceIntent = new Intent(UserActivity.this, MyBackgroundService.class);
+        startService(serviceIntent);
+        finish();
     }
 
     public void getdata(){
