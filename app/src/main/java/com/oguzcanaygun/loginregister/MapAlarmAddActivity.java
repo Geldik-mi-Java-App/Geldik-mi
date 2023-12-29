@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.snackbar.Snackbar;
 import com.oguzcanaygun.loginregister.databinding.ActivityMapAlarmAddBinding;
 
 public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -48,6 +49,8 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private int intentRadius;
     private LatLng intentLatlng;
+    private boolean permissionDeniedOnce = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +64,12 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                 Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
         };
 
+        initLocationCallback();  // Move this line to onCreate
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, locationPermissions, LOCATION_PERMISSION_REQUEST_CODE);
         } else {
-            initLocationCallback();
             requestLocationUpdates();
         }
 
@@ -73,8 +77,9 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
     }
+
+
 
     private void initLocationCallback() {
         locationCallback = new LocationCallback() {
@@ -95,7 +100,7 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(), locationCallback, null);
         } else {
-            Toast.makeText(this, "Konum izni reddedildi", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Konum izni gerekli", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -222,10 +227,27 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                 requestLocationUpdates();
                 enableLocationFeatures();
             } else {
-                Toast.makeText(this, "Konum izni reddedildi.", Toast.LENGTH_SHORT).show();
-                navigateToAppSettings();
+                if (permissionDeniedOnce) {
+                    // User has denied permission once, show snackbar directing to app settings
+                    showPermissionSnackbar();
+                } else {
+                    // First time permission denied, show a message or snackbar asking for permission
+                    Toast.makeText(this, "Konum izni gerekli.", Toast.LENGTH_SHORT).show();
+                    permissionDeniedOnce = true;
+                }
             }
         }
+    }
+
+    private void showPermissionSnackbar() {
+        Snackbar.make(binding.getRoot(), "Konum izni verilmedi. Uygulama ayarlarına gidin ve izinleri etkinleştirin.", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Ayarlar", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        navigateToAppSettings();
+                    }
+                })
+                .show();
     }
     private void navigateToAppSettings() {
         Intent settingsIntent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -290,5 +312,6 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
             Toast.makeText(this,"Lütfen önce ulaşmak istediğiniz alanı belirleyiniz",Toast.LENGTH_SHORT).show();
         }
    }
+
 
 }

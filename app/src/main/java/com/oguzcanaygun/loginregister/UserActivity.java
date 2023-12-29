@@ -14,6 +14,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -70,6 +72,12 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!checkLocationPermissions()){
+            Intent intent = new Intent(UserActivity.this, MapAlarmAddActivity.class);
+            startActivity(intent);
+            finish();
+
+        }
 
         binding = ActivityUserBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -102,9 +110,34 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         binding.symbolView.setImageResource(R.drawable.no_pp_100);
         setSupportActionBar(toolbar);
 
+        setExpandableListView();
 
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this,binding.drawerLayout,R.string.open,R.string.close);
+        binding.drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setupNavigationDrawer();
 
+        int i = R.id.friends;
+        System.out.println(i);
+        System.out.println(R.id.exit);
 
+    }
+    private boolean checkLocationPermissions() {
+        // Check if the app has the necessary location permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int coarsePermission = checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION);
+            int finePermission = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION);
+
+            return coarsePermission == PackageManager.PERMISSION_GRANTED &&
+                    finePermission == PackageManager.PERMISSION_GRANTED;
+        }
+
+        // If the SDK version is less than M, assume permissions are granted
+        return true;
+    }
+
+    public void setExpandableListView(){
         expandableListView= findViewById(R.id.expandableListView);
         expandableListAdapter = new MyExpandableListAdapter(this, groupList, alarmCollection);
         expandableListView.setAdapter(expandableListAdapter);
@@ -112,10 +145,10 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
             int lastExpandedPosition =-1;
             @Override
             public void onGroupExpand(int groupPosition) {
-            if (lastExpandedPosition!=-1 && groupPosition!= lastExpandedPosition){
-                expandableListView.collapseGroup(lastExpandedPosition);
-            }
-            lastExpandedPosition=groupPosition;
+                if (lastExpandedPosition!=-1 && groupPosition!= lastExpandedPosition){
+                    expandableListView.collapseGroup(lastExpandedPosition);
+                }
+                lastExpandedPosition=groupPosition;
             }
         });
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -148,17 +181,6 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
                 return true;
             }
         });
-
-
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this,binding.drawerLayout,R.string.open,R.string.close);
-        binding.drawerLayout.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setupNavigationDrawer();
-
-        int i = R.id.friends;
-        System.out.println(i);
-        System.out.println(R.id.exit);
 
     }
     @Override

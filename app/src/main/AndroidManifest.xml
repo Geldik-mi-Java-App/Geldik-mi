@@ -30,7 +30,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY" />
+            android:value="AIzaSyAvEMpyPDVdAc99ez1cc9k1JbgqQ73i6g0" />
 
         <activity
             android:name=".MapAlarmAddActivity"
