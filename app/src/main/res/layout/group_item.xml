@@ -11,6 +11,9 @@
         android:layout_height="wrap_content"
         android:paddingLeft="50dp"
         android:text=""
+        android:textColor="@color/white"
+        android:textSize="35dp"
+        android:textStyle="bold"
 
         ></TextView>
 

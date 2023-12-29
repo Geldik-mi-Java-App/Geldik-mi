@@ -50,6 +50,25 @@
         app:layout_constraintStart_toEndOf="@+id/symbolView"
         app:layout_constraintWidth_max="200dp"
         app:layout_constraintTop_toTopOf="@+id/symbolView"  />
+    <LinearLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="220dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/symbolView"
+        app:layout_constraintTop_toBottomOf="@+id/userToolbar">
+
+        <!-- This FrameLayout is a placeholder for the MapFragment -->
+        <FrameLayout
+            android:id="@+id/mapFragmentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/button"
@@ -79,12 +98,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/expandableListView"
+            android:background="#9C8692F7"
 
             >
 
         </ExpandableListView>
 
     </LinearLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -39,7 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserActivity extends AppCompatActivity implements UserIdCallback {
+public class UserActivity extends AppCompatActivity implements UserIdCallback, MapFragment.OnAlarmSelectedListener {
 
 
 
@@ -90,7 +90,11 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
             createGroupList();
             createCollection();
         }
-
+        MapFragment mapFragment = new MapFragment();
+        mapFragment.setOnAlarmSelectedListener(this);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.mapFragmentContainer, mapFragment)
+                .commit();
 
 
         toolbar = binding.userToolbar.getRoot();
@@ -129,8 +133,9 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
                                 "\nEnlem: " + selectedAlarm.getLatitude() +
                                 "\nBoylam: " + selectedAlarm.getLongitude() +
                                 "\nÇap: " + selectedAlarm.getRadius();
-
+                        onAlarmSelected(selectedAlarm.getLatitude(),selectedAlarm.getLongitude(),selectedAlarm.getRadius());
                         Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
+                        expandableListView.collapseGroup(groupPosition);
                     } else {
                         // Handle the case where the alarmsInGroup is null or the index is out of bounds
                         Toast.makeText(getApplicationContext(), "Invalid selection", Toast.LENGTH_LONG).show();
@@ -141,20 +146,6 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
                 }
 
                 return true;
-
-
-
-            /*    Object selectedObject = expandableListAdapter.getChild(groupPosition, childPosition);
-                if (selectedObject != null) {
-                    String selected = selectedObject.toString();
-                    Toast.makeText(getApplicationContext(), selected + " Seçildi", Toast.LENGTH_LONG).show();
-                } else {
-                    // Handle the case where selectedObject is null
-                    Toast.makeText(getApplicationContext(), "Null object selected", Toast.LENGTH_LONG).show();
-                }
-
-
-                return true;   */
             }
         });
 
@@ -223,7 +214,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
         LatLng latLng = intent.getParcelableExtra("latlng");
 
         if (alarmName == null || latLng == null) {
-            Toast.makeText(UserActivity.this, "Alarm or LatLng is null", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserActivity.this, "", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -423,24 +414,6 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
                 });
 
     }
-    private void processDocument(QueryDocumentSnapshot document){
-        Log.d("UserActivity", "Processing Firestore document: " + document.getId());
-        String alarmName = document.getString("alarmName");
-        Double latitude = document.getDouble("latitude");
-        Double longitude = document.getDouble("longitude");
-        Double radius = document.getDouble("radius");
-
-        if (alarmName != null && latitude != null && longitude != null && radius != null) {
-            Alarm alarm = new Alarm(alarmName, latitude, longitude, radius);
-            alarmList.add(alarm);
-            loadChild(alarm);
-            Log.d("UserActivity", "Alarm added: " + alarm.toString());
-        } else {
-            Log.e("UserActivity", "Invalid data in Firestore document");
-        }
-
-    }
-
 
 
     @Override
@@ -483,4 +456,11 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback {
     }
 
 
+    @Override
+    public void onAlarmSelected(double latitude, double longitude, double radius) {
+        MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragmentContainer);
+        if (mapFragment != null) {
+            mapFragment.drawCircleOnMap(latitude, longitude, radius);
+        }
+    }
 }
