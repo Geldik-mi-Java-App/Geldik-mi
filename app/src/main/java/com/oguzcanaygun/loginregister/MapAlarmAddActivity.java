@@ -1,7 +1,5 @@
 package com.oguzcanaygun.loginregister;
 
-import static androidx.core.location.LocationManagerCompat.requestLocationUpdates;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -9,8 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.renderscript.ScriptGroup;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
@@ -34,7 +32,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.oguzcanaygun.loginregister.databinding.ActivityMapAlarmAddBinding;
 
@@ -51,7 +48,6 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
     private LatLng intentLatlng;
     private boolean permissionDeniedOnce = false;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,28 +55,32 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         binding = ActivityMapAlarmAddBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Additional Permissions
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.VIBRATE,
+                Manifest.permission.WAKE_LOCK,
+                Manifest.permission.FOREGROUND_SERVICE,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        }, 2);
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         locationPermissions = new String[]{
-                Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
         };
 
-        initLocationCallback();  // Move this line to onCreate
+        initLocationCallback();
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, locationPermissions, LOCATION_PERMISSION_REQUEST_CODE);
-        } else {
+        if (checkLocationPermissions()) {
             requestLocationUpdates();
+        } else {
+            requestLocationPermissions();
         }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
-
-
-
     private void initLocationCallback() {
         locationCallback = new LocationCallback() {
             @Override
@@ -97,12 +97,15 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
     }
 
     private void requestLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (checkLocationPermissions()) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                return;
+            }
             fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(), locationCallback, null);
         } else {
             Toast.makeText(this, "Konum izni gerekli", Toast.LENGTH_LONG).show();
         }
-
     }
 
     private LocationRequest createLocationRequest() {
@@ -127,8 +130,6 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                             int radius = Integer.parseInt(radiusStr);
                             addCircle(latLng, radius);
                         }
-
-
                     }
                 })
                 .setNegativeButton("İptal", new DialogInterface.OnClickListener() {
@@ -145,8 +146,8 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         if (circle != null) {
             circle.remove();
         }
-        intentRadius=radius;
-        intentLatlng=latLng;
+        intentRadius = radius;
+        intentLatlng = latLng;
         int strokeColor = getResources().getColor(R.color.colorRed, getTheme());
         int fillColor = getResources().getColor(R.color.redTransparent, getTheme());
         circle = mMap.addCircle(new CircleOptions()
@@ -155,9 +156,7 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                 .strokeWidth(2)
                 .strokeColor(strokeColor)
                 .fillColor(fillColor));
-
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -169,40 +168,44 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                 showRadiusInputDialog(latLng);
             }
         });
-        if (checkLocationPermission()) {
-            // Permissions are granted, enable the location features
+        if (checkLocationPermissions()) {
             enableLocationFeatures();
         } else {
-            // Permissions are not granted, request them
             requestLocationPermissions();
         }
-
     }
+
     private void requestLocationPermissions() {
         ActivityCompat.requestPermissions(this, locationPermissions, LOCATION_PERMISSION_REQUEST_CODE);
     }
-    private boolean checkLocationPermission() {
+
+    private boolean checkLocationPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED);
     }
+
     @SuppressLint("MissingPermission")
     private void enableLocationFeatures() {
-        // Enable the "My Location" button and blue dot
         mMap.setMyLocationEnabled(true);
 
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
-                // Call your method to zoom to the user's location
                 zoomToUserLocation();
                 return false;
             }
         });
     }
-    private void zoomToUserLocation(){
 
+    private void zoomToUserLocation() {
         if (mMap != null && fusedLocationProviderClient != null) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (checkLocationPermissions()) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    return;
+                }
                 fusedLocationProviderClient.getLastLocation()
                         .addOnSuccessListener(this, location -> {
                             if (location != null) {
@@ -213,25 +216,23 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                             }
                         });
             } else {
-                // Handle the case where permissions are not granted
                 Toast.makeText(this, "Konum izni gerekli.", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (checkLocationPermissions()) {
                 initLocationCallback();
                 requestLocationUpdates();
                 enableLocationFeatures();
             } else {
                 if (permissionDeniedOnce) {
-                    // User has denied permission once, show snackbar directing to app settings
                     showPermissionSnackbar();
                 } else {
-                    // First time permission denied, show a message or snackbar asking for permission
                     Toast.makeText(this, "Konum izni gerekli.", Toast.LENGTH_SHORT).show();
                     permissionDeniedOnce = true;
                 }
@@ -249,16 +250,19 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                 })
                 .show();
     }
+
     private void navigateToAppSettings() {
         Intent settingsIntent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         settingsIntent.setData(Uri.parse("package:" + getPackageName()));
         startActivity(settingsIntent);
     }
+
     @Override
     protected void onPause() {
         super.onPause();
-        if (locationCallback!=null&&fusedLocationProviderClient!=null){
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);}
+        if (locationCallback != null && fusedLocationProviderClient != null) {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        }
     }
 
     @Override
@@ -266,14 +270,15 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         super.onResume();
         requestLocationUpdates();
     }
-   public void backButton(View view){
+
+    public void backButton(View view) {
         Intent intent = new Intent(MapAlarmAddActivity.this, UserActivity.class);
         startActivity(intent);
         finish();
-   }
-   public void sendAlarm(View view){
-        if (circle!=null) {
+    }
 
+    public void sendAlarm(View view) {
+        if (circle != null) {
             Intent intent = new Intent(MapAlarmAddActivity.this, UserActivity.class);
             intent.putExtra("radius", intentRadius);
             intent.putExtra("latlng", intentLatlng);
@@ -289,15 +294,12 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                         public void onClick(DialogInterface dialog, int which) {
                             String alarmNameStr = nameInput.getText().toString();
                             if (!alarmNameStr.isEmpty()) {
-                            intent.putExtra("alarm_ismi", alarmNameStr);
-                            startActivity(intent);
-                            finish();
-
+                                intent.putExtra("alarm_ismi", alarmNameStr);
+                                startActivity(intent);
+                                finish();
                             } else {
-                                Toast.makeText(getApplicationContext(),"Geçerli bir alarm ismi belirtiniz",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Geçerli bir alarm ismi belirtiniz", Toast.LENGTH_SHORT).show();
                             }
-
-
                         }
                     })
                     .setNegativeButton("İptal", new DialogInterface.OnClickListener() {
@@ -307,11 +309,8 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                         }
                     })
                     .show();
-
-        } else if (circle==null) {
-            Toast.makeText(this,"Lütfen önce ulaşmak istediğiniz alanı belirleyiniz",Toast.LENGTH_SHORT).show();
+        } else if (circle == null) {
+            Toast.makeText(this, "Lütfen önce ulaşmak istediğiniz alanı belirleyiniz", Toast.LENGTH_SHORT).show();
         }
-   }
-
-
+    }
 }

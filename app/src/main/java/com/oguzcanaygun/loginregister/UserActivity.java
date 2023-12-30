@@ -5,14 +5,22 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -36,14 +44,14 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.oguzcanaygun.loginregister.databinding.ActivityUserBinding;
 import com.squareup.picasso.Picasso;
 
+import org.checkerframework.checker.units.qual.A;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class UserActivity extends AppCompatActivity implements UserIdCallback, MapFragment.OnAlarmSelectedListener {
-
-
 
 
     ActivityUserBinding binding;
@@ -59,10 +67,12 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
     List<String> groupList;
     Map<String, List<Alarm>> alarmCollection = new HashMap<>();
+    Alarm selectedAlarm;
 
     ExpandableListView expandableListView;
     MyExpandableListAdapter expandableListAdapter;
     ArrayList<String> alarmisimler;
+    private PendingIntent pendingIntent;
     private static List<Alarm> alarmList;
     private List<String> namesList = new ArrayList<>();
     private List<Double> latitudeList = new ArrayList<>();
@@ -72,7 +82,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!checkLocationPermissions()){
+        if (!checkLocationPermissions()) {
             Intent intent = new Intent(UserActivity.this, MapAlarmAddActivity.class);
             startActivity(intent);
             finish();
@@ -84,15 +94,14 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         auth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
 
-        alarmisimler= new ArrayList<String>();
-        alarmList= new ArrayList<>();
+        alarmisimler = new ArrayList<String>();
+        alarmList = new ArrayList<>();
 
         userID = auth.getUid();
         System.out.println(userID);
-        if (userID==null){
+        if (userID == null) {
             retrieveUserID(this);
-        }
-        else {
+        } else {
             getdata();
             getAlarmData();
             createGroupList();
@@ -112,7 +121,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
         setExpandableListView();
 
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this,binding.drawerLayout,R.string.open,R.string.close);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, binding.drawerLayout, R.string.open, R.string.close);
         binding.drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -122,33 +131,26 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         System.out.println(i);
         System.out.println(R.id.exit);
 
-    }
-    private boolean checkLocationPermissions() {
-        // Check if the app has the necessary location permissions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int coarsePermission = checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION);
-            int finePermission = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
+        intent.setAction("com.oguzcanaygun.loginregister.ACTION_GEOFENCE_TRANSITION");
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            return coarsePermission == PackageManager.PERMISSION_GRANTED &&
-                    finePermission == PackageManager.PERMISSION_GRANTED;
-        }
-
-        // If the SDK version is less than M, assume permissions are granted
-        return true;
     }
 
-    public void setExpandableListView(){
-        expandableListView= findViewById(R.id.expandableListView);
+
+    public void setExpandableListView() {
+        expandableListView = findViewById(R.id.expandableListView);
         expandableListAdapter = new MyExpandableListAdapter(this, groupList, alarmCollection);
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            int lastExpandedPosition =-1;
+            int lastExpandedPosition = -1;
+
             @Override
             public void onGroupExpand(int groupPosition) {
-                if (lastExpandedPosition!=-1 && groupPosition!= lastExpandedPosition){
+                if (lastExpandedPosition != -1 && groupPosition != lastExpandedPosition) {
                     expandableListView.collapseGroup(lastExpandedPosition);
                 }
-                lastExpandedPosition=groupPosition;
+                lastExpandedPosition = groupPosition;
             }
         });
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -160,13 +162,13 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
                     List<Alarm> alarmsInGroup = alarmCollection.get(selectedGroup);
 
                     if (alarmsInGroup != null && childPosition < alarmsInGroup.size()) {
-                        Alarm selectedAlarm = alarmsInGroup.get(childPosition);
+                        selectedAlarm = alarmsInGroup.get(childPosition);
 
                         String toastMessage = "Alarm Adı: " + selectedAlarm.getAlarmName() +
                                 "\nEnlem: " + selectedAlarm.getLatitude() +
                                 "\nBoylam: " + selectedAlarm.getLongitude() +
                                 "\nÇap: " + selectedAlarm.getRadius();
-                        onAlarmSelected(selectedAlarm.getLatitude(),selectedAlarm.getLongitude(),selectedAlarm.getRadius());
+                        onAlarmSelected(selectedAlarm.getLatitude(), selectedAlarm.getLongitude(), selectedAlarm.getRadius());
                         Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
                         expandableListView.collapseGroup(groupPosition);
                     } else {
@@ -183,15 +185,16 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         });
 
     }
+
     @Override
     public void onUserIdReceived(String userID) {
         Log.d("UserActivity", "Received userID: " + userID);
-        this.userID=userID;
+        this.userID = userID;
         getdata();
         createCollection();
     }
 
-    public void retrieveUserID(UserIdCallback callback){
+    public void retrieveUserID(UserIdCallback callback) {
         String uid = auth.getUid();
         if (uid == null) {
             // Handle the case where the user ID is null
@@ -304,81 +307,87 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
 
     private void createGroupList() {
-    groupList = new ArrayList<>();
-    groupList.add("Alarmlar");
-
+        groupList = new ArrayList<>();
+        groupList.add("Alarmlar");
 
 
     }
 
-    public void setupNavigationDrawer(){
+    public void setupNavigationDrawer() {
         binding.navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 View dummyView = new View(UserActivity.this);
-                if (item.getItemId()==R.id.turnBack){
-                    if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)){
+                if (item.getItemId() == R.id.turnBack) {
+                    if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
                         binding.drawerLayout.closeDrawer(GravityCompat.START);
                     }
-                }
-                else if (item.getItemId()==R.id.shareUS){
+                } else if (item.getItemId() == R.id.shareUS) {
 
-                }
-                else if (item.getItemId()==R.id.friends){
+                } else if (item.getItemId() == R.id.friends) {
 
-                }
-                else if (item.getItemId()==R.id.alarms){
+                } else if (item.getItemId() == R.id.alarms) {
 
-                }
-                else if (item.getItemId()==R.id.chatArchive){
+                } else if (item.getItemId() == R.id.chatArchive) {
 
-                }
-                else if (item.getItemId()==R.id.backGround){
-                startBackGroundService(dummyView);
+                } else if (item.getItemId() == R.id.backGround) {
+                    startBackGroundService(dummyView);
 
 
+                } else if (item.getItemId() == R.id.logOut) {
+                    logOutClicked(dummyView);
+                } else if (item.getItemId() == R.id.exit) {
+                    System.exit(0);
                 }
-                else if (item.getItemId()==R.id.logOut){logOutClicked(dummyView);}
-                else if (item.getItemId()==R.id.exit){System.exit(0);}
                 return false;
             }
         });
     }
-    public void startBackGroundService(View view){
-        Intent serviceIntent = new Intent(UserActivity.this, MyBackgroundService.class);
-        startService(serviceIntent);
-        finish();
+
+    public void startBackGroundService(View view) {
+        Intent serviceIntent = new Intent();
+        serviceIntent.setComponent(new ComponentName("com.oguzcanaygun.loginregister", "com.oguzcanaygun.loginregister.MyBackgroundService"));
+        serviceIntent.putExtra("name", selectedAlarm.getAlarmName());
+        serviceIntent.putExtra("latitude", selectedAlarm.getLatitude());
+        serviceIntent.putExtra("longitude", selectedAlarm.getLongitude());
+        serviceIntent.putExtra("radius", (float) selectedAlarm.getRadius());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
     }
 
-    public void getdata(){
+    public void getdata() {
 
         DocumentReference documentReferenceDoc = firebaseFirestore.collection("UserInfo").document(userID);
         DocumentReference documentReferencePic = firebaseFirestore.collection("ProfilePic").document(userID);
         documentReferenceDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-           if (error!=null){
-               Toast.makeText(UserActivity.this, error.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-           }
-           if (value!=null && value.exists()){
-                userName = value.getString("username");
-                email = value.getString("email");
-                password = value.getString("password");
-               toolbar.setTitle(userName);
-               binding.textUserName.setText(userName);
+                if (error != null) {
+                    Toast.makeText(UserActivity.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
+                if (value != null && value.exists()) {
+                    userName = value.getString("username");
+                    email = value.getString("email");
+                    password = value.getString("password");
+                    toolbar.setTitle(userName);
+                    binding.textUserName.setText(userName);
 
 
-           }
+                }
             }
         });
         documentReferencePic.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                if (error!=null){
-                    Toast.makeText(UserActivity.this, error.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                if (error != null) {
+                    Toast.makeText(UserActivity.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                 }
-                if (value!=null && value.exists()){
+                if (value != null && value.exists()) {
                     profilePicUrl = value.getString("imageUrl");
                     Picasso.get().load(profilePicUrl).into(binding.symbolView);
                     Picasso.get().load(profilePicUrl).into(binding.userToolbar.circularImageView);
@@ -387,7 +396,8 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         });
 
     }
-    public void getAlarmData(){
+
+    public void getAlarmData() {
         Log.d("UserActivity", "Getting alarm data for user: " + userID);
 
         String userId = userID;
@@ -448,7 +458,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.option_menu,menu);
+        menuInflater.inflate(R.menu.option_menu, menu);
 
         return super.onCreateOptionsMenu(menu);
 
@@ -456,17 +466,17 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)){ return true;}
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
 
-        if (item.getItemId()==R.id.add_alarm){
+        if (item.getItemId() == R.id.add_alarm) {
             Intent intent = new Intent(UserActivity.this, MapAlarmAddActivity.class);
             startActivity(intent);
             finish();
-        }
-        else if (item.getItemId()==R.id.remove_alarm){
+        } else if (item.getItemId() == R.id.remove_alarm) {
 
-        }
-        else if (item.getItemId()==R.id.userSettings){
+        } else if (item.getItemId() == R.id.userSettings) {
             Intent intent = new Intent(UserActivity.this, SettingsActivity.class);
             startActivity(intent);
             finish();
@@ -476,7 +486,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         return super.onOptionsItemSelected(item);
     }
 
-    public void logOutClicked(View view){
+    public void logOutClicked(View view) {
         auth.signOut();
         Intent intent = new Intent(UserActivity.this, MainActivity.class);
         startActivity(intent);
@@ -490,6 +500,98 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragmentContainer);
         if (mapFragment != null) {
             mapFragment.drawCircleOnMap(latitude, longitude, radius);
+        }
+    }
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+
+    public void setAlarm(View view) {
+        if (selectedAlarm == null) {
+            Toast.makeText(this, "Çalıştırmak için bir alarm seçiniz", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double latitude = selectedAlarm.getLatitude();
+        double longitude = selectedAlarm.getLongitude();
+        double radius = selectedAlarm.getRadius();
+
+        if (Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(radius)) {
+            Log.e("UserActivity", "Latitude, longitude, or radius is NaN");
+            Toast.makeText(this, "Alarm verileri eksik veya hatalı", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if location permissions are granted
+        if (checkLocationPermissions()) {
+            // Permissions are granted, proceed with creating the geofence
+            createGeofence(latitude, longitude, radius);
+        } else {
+            // Request permissions if not granted
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_BACKGROUND_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    private boolean checkLocationPermissions() {
+        // Check if the app has the necessary location permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int coarsePermission = checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION);
+            int finePermission = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION);
+            int backgroundPermission = checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+
+            return coarsePermission == PackageManager.PERMISSION_GRANTED &&
+                    finePermission == PackageManager.PERMISSION_GRANTED && backgroundPermission == PackageManager.PERMISSION_GRANTED;
+        }
+
+        // If the SDK version is less than M, assume permissions are granted
+        return true;
+    }
+
+    private void createGeofence(double latitude, double longitude, double radius) {
+        // Create a geofence request
+        Geofence geofence = new Geofence.Builder()
+                .setRequestId(selectedAlarm.getAlarmName()) // Use a unique ID for the geofence
+                .setCircularRegion(latitude, longitude, (float) radius)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
+
+        GeofencingClient geofencingClient = LocationServices.getGeofencingClient(this);
+
+        // Create a geofence request
+        GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
+                .addGeofence(geofence)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .build();
+
+        // Add the geofence to the geofencing client
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        geofencingClient.addGeofences(geofencingRequest, pendingIntent)
+                .addOnSuccessListener(this, aVoid -> {
+                    Log.d("UserActivity", "Geofence added successfully");
+                    Toast.makeText(this, "Geofence added successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(this, e -> {
+                    Log.e("UserActivity", "Error adding geofence: " + e.getLocalizedMessage());
+                    Toast.makeText(this, "Error adding geofence: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                // Permissions granted, proceed with creating the geofence
+                if (selectedAlarm != null) {
+                    createGeofence(selectedAlarm.getLatitude(), selectedAlarm.getLongitude(), selectedAlarm.getRadius());
+                }
+            } else {
+                // Permissions not granted
+                Toast.makeText(this, "Location permissions not granted", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
