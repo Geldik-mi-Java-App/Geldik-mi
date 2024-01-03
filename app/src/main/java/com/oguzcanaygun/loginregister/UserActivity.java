@@ -22,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -463,8 +462,10 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
             startActivity(intent);
             finish();
         }
-        else if (item.getItemId()==R.id.remove_alarm){
-
+        else if (item.getItemId()==R.id.permissions){
+            Intent intent = new Intent(UserActivity.this, PermissionActivity.class);
+            startActivity(intent);
+            finish();
         }
         else if (item.getItemId()==R.id.userSettings){
             Intent intent = new Intent(UserActivity.this, SettingsActivity.class);

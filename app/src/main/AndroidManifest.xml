@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginRegister"
         tools:targetApi="31">
+        <activity
+            android:name=".PermissionActivity"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -29,6 +33,7 @@
             android:name=".MapAlarmAddActivity"
             android:exported="false"
             android:label="@string/title_activity_map_alarm_add" />
+
         <service android:name=".MyBackgroundService" />
 
         <activity

@@ -5,4 +5,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="colorRed">#FF0057</color>
     <color name="redTransparent">#80FF0057</color>
+    <color name="switchOn">#CB00FFD9</color>
+    <color name="switchOff">#AE404040</color>
+    <color name="switchNeutral">#7500FFD9</color>
+    <color name="switchToggle">#A8B6B6B6</color>
 </resources>
