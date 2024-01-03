@@ -21,6 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginRegister"
         tools:targetApi="31">
+
         <activity
             android:name=".PermissionActivity"
             android:exported="false" />
