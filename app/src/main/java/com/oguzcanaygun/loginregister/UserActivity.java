@@ -7,12 +7,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 
+import com.google.android.gms.location.Geofence;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -68,6 +70,9 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
     private List<Double> longitudeList = new ArrayList<>();
     private List<Double> radiusList = new ArrayList<>();
 
+    private PendingIntent geofencePendingIntent;
+    private GeofenceHelper geofenceHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +126,18 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         System.out.println(i);
         System.out.println(R.id.exit);
 
+        // Initialize geofence helper
+        geofenceHelper = new GeofenceHelper(this);
+
+        // Initialize geofence PendingIntent
+        geofencePendingIntent = createGeofencePendingIntent();
+
     }
+    private PendingIntent createGeofencePendingIntent() {
+        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
+        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
     private boolean checkLocationPermissions() {
         // Check if the app has the necessary location permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -492,5 +508,23 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         if (mapFragment != null) {
             mapFragment.drawCircleOnMap(latitude, longitude, radius);
         }
+        // Create and add a geofence when an alarm is selected
+        addGeofence(latitude, longitude, radius);
+    }
+    private void addGeofence(double latitude, double longitude, double radius) {
+        // Create a geofence
+        Geofence geofence = new Geofence.Builder()
+                .setRequestId("SelectedAlarmGeofence")
+                .setCircularRegion(latitude, longitude, (float) radius)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                .build();
+
+        // Add the geofence to the list
+        List<Geofence> geofenceList = new ArrayList<>();
+        geofenceList.add(geofence);
+
+        // Add the geofence to the GeofencingClient
+        geofenceHelper.addGeofence(geofenceList, geofencePendingIntent,this);
     }
 }

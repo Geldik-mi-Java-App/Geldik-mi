@@ -19,7 +19,7 @@ import androidx.core.app.NotificationCompat;
 public class MyBackgroundService extends Service {
 
     private static final int NOTIFICATION_ID = 1;
-    private static final String CHANNEL_ID = "MyBackgroundServiceChannel";
+    public static final String CHANNEL_ID = "MyBackgroundServiceChannel";
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60; // Minimum time between location updates (1 minute)
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 10.0f; // Minimum distance between location updates (10 meters)
 

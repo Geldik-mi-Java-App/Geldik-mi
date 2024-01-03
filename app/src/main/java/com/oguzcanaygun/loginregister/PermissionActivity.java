@@ -26,14 +26,15 @@ public class PermissionActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 123;
 
     private String[] permissions = {
-            "Bildirim Gönderme İzni",
-            "Galeriye Giriş izni",
-            "Yaklaşık Konuma Erişim İzni",
-            "Net Konuma Erişim İzni",
-            "Internet Erişim İzni",
-            "Alarm Çalıştırma İzni",
-            "Arkaplanda Çalışma İzni",
-            "Arkaplanda Konum Takibi İzni"
+            "android.permission.POST_NOTIFICATIONS",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.ACCESS_COARSE_LOCATION",
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.INTERNET",
+            "android.permission.WAKE_LOCK",
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.ACCESS_BACKGROUND_LOCATION",
+            "android.permission.VIBRATE"
     };
 
     @Override
