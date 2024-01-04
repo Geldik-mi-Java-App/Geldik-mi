@@ -12,6 +12,9 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.Priority;
+
 public class MyBackgroundService extends Service {
 
     private static final int NOTIFICATION_ID = 1;
@@ -21,6 +24,7 @@ public class MyBackgroundService extends Service {
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
+
     }
 
     @Override
@@ -28,6 +32,13 @@ public class MyBackgroundService extends Service {
         Log.d("MyBackgroundService", "Service started");
         showNotification();
 
+<<<<<<< Updated upstream
+=======
+        // Start location tracking
+        startLocationUpdates();
+
+
+>>>>>>> Stashed changes
         // Return START_STICKY to ensure the service restarts if it gets terminated
         return START_STICKY;
     }
@@ -71,6 +82,71 @@ public class MyBackgroundService extends Service {
             }
         }
     }
+<<<<<<< Updated upstream
+=======
+    private void startLocationUpdates() {
+        // Initialize location manager and listener
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                // Handle location updates here
+                Log.d("MyBackgroundService", "Location updated: " + location.getLatitude() + ", " + location.getLongitude());
+
+                // Update notification with latitude and longitude
+                updateNotification("Latitude: " + location.getLatitude() + "\nLongitude: " + location.getLongitude());
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                // Handle status changes if needed
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                // Handle provider enabled if needed
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                // Handle provider disabled if needed
+            }
+        };
+
+        try {
+            // Request location updates
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    1000,
+                    100,
+                    locationListener
+            );
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateNotification(String contentText) {
+        // Update the existing notification with latitude and longitude information
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Your App is Running")
+                .setContentText(contentText)
+                .setSmallIcon(R.drawable.baseline_emoji_transportation_24)
+                .setOngoing(true) // Notification won't be swiped away by the user
+                .setPriority(NotificationCompat.PRIORITY_LOW);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.notify(NOTIFICATION_ID, builder.build());
+        }
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+>>>>>>> Stashed changes
 
     @Override
     public void onDestroy() {
