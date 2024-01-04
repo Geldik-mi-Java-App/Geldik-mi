@@ -42,6 +42,11 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                 showAlarmNotification(context);
                 playAlarmSound(context);
                 vibrate(context);
+
+                // Start the SplashActivity
+                Intent splashIntent = new Intent(context, SplashActivity.class);
+                splashIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(splashIntent);
             }
         }
     }
@@ -64,6 +69,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                 .setContentTitle("Geofence Alert")
                 .setContentText("You've entered the geofence!")
                 .setSmallIcon(R.drawable.baseline_emoji_transportation_24)
+                .setContentIntent(contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
