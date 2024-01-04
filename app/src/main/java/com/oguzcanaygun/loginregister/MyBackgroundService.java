@@ -134,8 +134,7 @@ public class MyBackgroundService extends Service {
                 // Handle location updates here
                 Log.d("MyBackgroundService", "Location updated: " + location.getLatitude() + ", " + location.getLongitude());
 
-                // Update notification with latitude and longitude
-                updateNotification("Latitude: " + location.getLatitude() + "\nLongitude: " + location.getLongitude());
+
             }
 
             @Override
