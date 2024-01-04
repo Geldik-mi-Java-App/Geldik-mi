@@ -5,9 +5,11 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +35,8 @@ public class MapFragment extends Fragment {
     private OnAlarmSelectedListener onAlarmSelectedListener;
     FusedLocationProviderClient fusedLocationProviderClient;
     GoogleMap googleMap;
+    private Button setTheAlarmButton;
+    UserActivity userActivity;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -46,6 +50,22 @@ public class MapFragment extends Fragment {
 
         }
     };
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof UserActivity) {
+            userActivity = (UserActivity) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement UserActivity");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        userActivity = null;
+    }
+
 
     public void enableMyLocation() {
         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -123,6 +143,20 @@ public class MapFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+        setTheAlarmButton = view.findViewById(R.id.setTheAlarm);
+
+        if (setTheAlarmButton != null) {
+            setTheAlarmButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (userActivity != null) {
+                        userActivity.setTheAlarm(v);
+                    }
+                }
+            });
+        } else {
+            Log.e("MapFragment", "setTheAlarmButton is null");
+        }
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 

@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -74,6 +75,8 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
     private PendingIntent geofencePendingIntent;
     private GeofenceHelper geofenceHelper;
+    public boolean alarmSwitch=false;
+    public Button setTheAlarmButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,6 +111,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.mapFragmentContainer, mapFragment)
                 .commit();
+        setTheAlarmButton = findViewById(R.id.setTheAlarm);
 
 
         toolbar = binding.userToolbar.getRoot();
@@ -179,11 +183,8 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
                     if (alarmsInGroup != null && childPosition < alarmsInGroup.size()) {
                         selectedAlarm = alarmsInGroup.get(childPosition);
 
-                        String toastMessage = "Alarm Adı: " + selectedAlarm.getAlarmName() +
-                                "\nEnlem: " + selectedAlarm.getLatitude() +
-                                "\nBoylam: " + selectedAlarm.getLongitude() +
-                                "\nÇap: " + selectedAlarm.getRadius();
-                        onAlarmSelected(selectedAlarm.getLatitude(),selectedAlarm.getLongitude(),selectedAlarm.getRadius());
+                        String toastMessage = "Alarm Adı: " + selectedAlarm.getAlarmName() +" seçildi";
+
                         Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
                         expandableListView.collapseGroup(groupPosition);
                     } else {
@@ -506,11 +507,25 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
     @Override
     public void onAlarmSelected(double latitude, double longitude, double radius) {
+        if (latitude==0 && longitude==0&&radius==0){
+            stopGeofenceMonitoring();
+
+
+        }
+        else{
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragmentContainer);
         if (mapFragment != null) {
             mapFragment.drawCircleOnMap(latitude, longitude, radius);
         }
-        addGeofence(latitude, longitude, radius);
+        addGeofence(latitude, longitude, radius);}
+    }
+    private void stopGeofenceMonitoring() {
+        // Create a list with the geofence request ID
+        List<String> geofenceIds = new ArrayList<>();
+        geofenceIds.add("SelectedAlarmGeofence");
+
+        // Remove the geofence from the GeofencingClient
+        geofenceHelper.removeGeofence(geofencePendingIntent);
     }
     private void addGeofence(double latitude, double longitude, double radius) {
         // Create a geofence
@@ -528,37 +543,52 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
         // Add the geofence to the GeofencingClient
         geofenceHelper.addGeofence(geofenceList, geofencePendingIntent,this);
     }
+
     public void setTheAlarm(View view){
         if (selectedAlarm!=null) {
+        if (alarmSwitch==false){
+            alarmSwitch=true;
+            onAlarmSelected(selectedAlarm.getLatitude(),selectedAlarm.getLongitude(),selectedAlarm.getRadius());
 
-            double latitude = selectedAlarm.getLatitude();
-            double longitude = selectedAlarm.getLongitude();
-            double radius = selectedAlarm.getRadius();
 
-            // Create a geofence
-            Geofence geofence = new Geofence.Builder()
-                    .setRequestId("SelectedAlarmGeofence")
-                    .setCircularRegion(latitude, longitude, (float) radius)
-                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                    .build();
+                double latitude = selectedAlarm.getLatitude();
+                double longitude = selectedAlarm.getLongitude();
+                double radius = selectedAlarm.getRadius();
 
-            // Add the geofence to the list
-            List<Geofence> geofenceList = new ArrayList<>();
-            geofenceList.add(geofence);
+                // Create a geofence
+                Geofence geofence = new Geofence.Builder()
+                        .setRequestId("SelectedAlarmGeofence")
+                        .setCircularRegion(latitude, longitude, (float) radius)
+                        .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                        .build();
 
-            // Create a PendingIntent for the geofence transition
-            PendingIntent geofencePendingIntent = createGeofencePendingIntent();
+                // Add the geofence to the list
+                List<Geofence> geofenceList = new ArrayList<>();
+                geofenceList.add(geofence);
 
-            // Add the geofence to the GeofencingClient
-            geofenceHelper.addGeofence(geofenceList, geofencePendingIntent, this);
+                // Create a PendingIntent for the geofence transition
+                PendingIntent geofencePendingIntent = createGeofencePendingIntent();
 
-            // Notify the user or perform any additional actions related to setting the alarm
-            // ...
-            Toast.makeText(this,"Alarm Takibi Başlatıldı",Toast.LENGTH_SHORT).show();
-        }
+                // Add the geofence to the GeofencingClient
+                geofenceHelper.addGeofence(geofenceList, geofencePendingIntent, this);
+
+                // Notify the user or perform any additional actions related to setting the alarm
+                // ...
+                Toast.makeText(this,"Alarm Takibi Başlatıldı",Toast.LENGTH_SHORT).show();
+
+
+
+        } else{
+            onAlarmSelected(0,0,0);
+            Toast.makeText(this, "Alarm Takibi sonlandırıldı",Toast.LENGTH_SHORT).show();
+            alarmSwitch=false;
+
+        }}
         else {
             Toast.makeText(this, "Lütfen önce bir Alarm Konumu seçiniz",Toast.LENGTH_SHORT).show();
         }
+
+
     }
 }
