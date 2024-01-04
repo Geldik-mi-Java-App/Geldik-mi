@@ -2,6 +2,7 @@ package com.oguzcanaygun.loginregister;
 
 import static com.oguzcanaygun.loginregister.MyBackgroundService.CHANNEL_ID;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +47,18 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void showAlarmNotification(Context context) {
+
+        Intent notificationIntent = new Intent(context, UserActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        // Create a PendingIntent for the notification action
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                context,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
         // Build and show a notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle("Geofence Alert")
