@@ -70,6 +70,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
     private List<Double> latitudeList = new ArrayList<>();
     private List<Double> longitudeList = new ArrayList<>();
     private List<Double> radiusList = new ArrayList<>();
+    Alarm selectedAlarm;
 
     private PendingIntent geofencePendingIntent;
     private GeofenceHelper geofenceHelper;
@@ -176,7 +177,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
                     List<Alarm> alarmsInGroup = alarmCollection.get(selectedGroup);
 
                     if (alarmsInGroup != null && childPosition < alarmsInGroup.size()) {
-                        Alarm selectedAlarm = alarmsInGroup.get(childPosition);
+                        selectedAlarm = alarmsInGroup.get(childPosition);
 
                         String toastMessage = "Alarm Adı: " + selectedAlarm.getAlarmName() +
                                 "\nEnlem: " + selectedAlarm.getLatitude() +
@@ -526,5 +527,38 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
         // Add the geofence to the GeofencingClient
         geofenceHelper.addGeofence(geofenceList, geofencePendingIntent,this);
+    }
+    public void setTheAlarm(View view){
+        if (selectedAlarm!=null) {
+
+            double latitude = selectedAlarm.getLatitude();
+            double longitude = selectedAlarm.getLongitude();
+            double radius = selectedAlarm.getRadius();
+
+            // Create a geofence
+            Geofence geofence = new Geofence.Builder()
+                    .setRequestId("SelectedAlarmGeofence")
+                    .setCircularRegion(latitude, longitude, (float) radius)
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                    .build();
+
+            // Add the geofence to the list
+            List<Geofence> geofenceList = new ArrayList<>();
+            geofenceList.add(geofence);
+
+            // Create a PendingIntent for the geofence transition
+            PendingIntent geofencePendingIntent = createGeofencePendingIntent();
+
+            // Add the geofence to the GeofencingClient
+            geofenceHelper.addGeofence(geofenceList, geofencePendingIntent, this);
+
+            // Notify the user or perform any additional actions related to setting the alarm
+            // ...
+            Toast.makeText(this,"Alarm Takibi Başlatıldı",Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Toast.makeText(this, "Lütfen önce bir Alarm Konumu seçiniz",Toast.LENGTH_SHORT).show();
+        }
     }
 }
