@@ -43,10 +43,11 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                 playAlarmSound(context);
                 vibrate(context);
 
+                if (!SplashActivity.isRunning){
                 // Start the SplashActivity
                 Intent splashIntent = new Intent(context, SplashActivity.class);
                 splashIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(splashIntent);
+                context.startActivity(splashIntent);}
             }
         }
     }
