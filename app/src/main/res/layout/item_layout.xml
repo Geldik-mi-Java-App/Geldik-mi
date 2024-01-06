@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemRelativeLayout"
+    android:orientation="vertical"
+    android:padding="16dp">
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/profilePic"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:clipToOutline="false"
+        android:padding="5dp"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/cornerCut"
+        app:strokeColor="@color/uygSari"
+        app:strokeWidth="5dp"
+        ></com.google.android.material.imageview.ShapeableImageView>
+    <TextView
+        android:layout_marginLeft="@android:dimen/app_icon_size"
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="Item Text"
+        android:layout_centerVertical="true"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="30dp"
+        android:src="@drawable/baseline_chat_24"
+        android:onClick="startChat"
+        android:layout_centerVertical="true"
+        ></ImageView>
+
+    <!-- Add other views as needed -->
+
+</RelativeLayout>

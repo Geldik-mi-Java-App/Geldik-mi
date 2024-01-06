@@ -19,7 +19,8 @@
 
     <include
         android:id="@+id/userToolbar"
-        layout="@layout/toolbar" />
+        layout="@layout/toolbar"
+        />
 
 
     <com.google.android.material.imageview.ShapeableImageView
@@ -32,7 +33,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userToolbar"
         app:shapeAppearanceOverlay="@style/cornerCut"
-        app:strokeColor="@color/purple"
+        app:strokeColor="@color/uygSari"
         app:strokeWidth="5dp" />
 
 
@@ -43,7 +44,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="150dp"
-        android:textColor="@color/purple"
+        android:textColor="@color/uygSari"
         android:textSize="25dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -80,6 +81,7 @@
         android:onClick="logOutClicked"
         android:text="Log Out"
         android:textSize="24dp"
+        android:background="@drawable/rounded_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -98,8 +100,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/expandableListView"
-            android:background="#9C8692F7"
-
+            android:background="#5733CCCC"
             >
 
         </ExpandableListView>

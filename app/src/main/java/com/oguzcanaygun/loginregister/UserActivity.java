@@ -344,6 +344,9 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
 
                 }
                 else if (item.getItemId()==R.id.friends){
+                    Intent intent = new Intent(UserActivity.this, FriendsActivity.class);
+                    startActivity(intent);
+                    finish();
 
                 }
                 else if (item.getItemId()==R.id.alarms){
