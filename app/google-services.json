@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "62099257761",
+    "project_id": "geldikmi",
+    "storage_bucket": "geldikmi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62099257761:android:8a79a12502744d59c133e0",
+        "android_client_info": {
+          "package_name": "com.oguzcanaygun.loginregister"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1RWJGV_7Nzp2Pc56tc9QeAjgFUAnMyEc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single" >
+    <item
+        android:id="@+id/turnBack"
+        android:title="Geri Dön"
+        android:icon="@drawable/baseline_login_24"
+        />
+    </group>
+    <item android:title="Hesabınız" >
+        <menu>
+            <group>
+                <item
+                    android:id="@+id/friends"
+                    android:title="Arkadaşlar"
+                    android:icon="@drawable/baseline_connect_without_contact_24"
+                    />
+                <item
+                    android:id="@+id/alarms"
+                    android:title="Alarmlar"
+                    android:icon="@drawable/baseline_add_alarm_24"
+                    />
+                <item
+                    android:id="@+id/chatArchive"
+                    android:title="Yazışmalar"
+                    android:icon="@drawable/baseline_message_24"
+                />
+            </group>
+        </menu>
+    </item>
+    <item android:title="Oturum Durumu" >
+        <menu>
+            <group>
+                <item
+                    android:id="@+id/backGround"
+                    android:title="ArkaPlanda Çalış"
+                    android:icon="@drawable/baseline_disabled_visible_24"
+                    />
+                <item
+                    android:id="@+id/logOut"
+                    android:title="Hesaptan Çık"
+                    android:icon="@drawable/baseline_no_accounts_24"
+                    />
+                <item
+                    android:id="@+id/exit"
+                    android:title="Uygulamayı Kapat"
+                    android:icon="@drawable/baseline_exit_to_app_24"
+                    />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/shareUS"
+        android:title="Paylaş"
+        android:icon="@drawable/baseline_share_24"
+        />
+</menu>

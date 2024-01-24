@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple">#8692f7</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorRed">#FF0057</color>
+    <color name="redTransparent">#80FF0057</color>
+    <color name="switchOn">#CB00FFD9</color>
+    <color name="switchOff">#AE404040</color>
+    <color name="switchNeutral">#7500FFD9</color>
+    <color name="switchToggle">#A8B6B6B6</color>
+    <color name="uygMavi">#33cccc</color>
+    <color name="uygPembe">#e5008e</color>
+    <color name="uygSari">#fea708</color>
+    <color name="uygSariSeffaf">#7EFEA708</color>
+    <color name="uygPembeSeffaf">#80E5008E</color>
+    <color name="uygMaviSeffaf">#7733CCCC</color>
+</resources>

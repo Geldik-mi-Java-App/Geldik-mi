@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/alarmGif"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/alarm"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        ></pl.droidsonroids.gif.GifImageView>
+
+    <!-- Add your splash screen UI elements here -->
+    <Button
+        android:id="@+id/closeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="30dp"
+        android:backgroundTint="@color/uygMavi"
+        android:textColor="@color/white"
+        android:text="Kapat"
+        android:textSize="30dp"
+        android:textStyle="italic"
+        />
+
+</RelativeLayout>

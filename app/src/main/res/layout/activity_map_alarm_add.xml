@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="582dp"
+        tools:context=".MapAlarmAddActivity" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/backButtonCardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/map"
+        android:layout_marginTop="17dp"
+        android:layout_marginLeft="50dp"
+        app:cardCornerRadius="8dp">
+
+        <Button
+            android:id="@+id/BackButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/design_default_color_primary"
+            android:onClick="backButton"
+            android:text="Geri Dön"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Save Alarm Button -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/saveAlarmCardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/map"
+        android:layout_marginTop="14dp"
+        android:layout_marginLeft="220dp"
+        android:layout_marginRight="20dp"
+        app:cardCornerRadius="8dp">
+
+        <Button
+            android:id="@+id/alarmSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/design_default_color_primary"
+            android:onClick="sendAlarm"
+            android:text="Alarmı Kaydet"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </androidx.cardview.widget.CardView>
+
+
+</RelativeLayout>

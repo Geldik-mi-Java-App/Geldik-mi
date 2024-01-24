@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:layout_marginLeft="30dp"
+    android:layout_marginBottom="20dp"
+    android:layout_marginRight="10dp"
+    >
+
+    <ImageView
+        android:id="@+id/symbolView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+
+        ></ImageView>
+
+    <TextView
+        android:layout_width="140dp"
+        android:layout_height="50dp"
+        android:id="@+id/textTitle"
+        android:textColor="@color/design_default_color_primary"
+        android:layout_below="@+id/symbolView"
+        android:textAlignment="center"
+        android:layout_centerHorizontal="true"
+        android:textSize="20dp"
+        android:textStyle="bold"
+
+        ></TextView>
+    <LinearLayout
+        android:layout_width="140dp"
+        android:layout_height="4dp"
+        android:background="#696FEA"
+        ></LinearLayout>
+    <LinearLayout
+        android:layout_width="140dp"
+        android:layout_height="4dp"
+        android:layout_below="@+id/textTitle"
+        android:background="#696FEA"
+
+        ></LinearLayout>
+    <LinearLayout
+        android:layout_width="4dp"
+        android:layout_height="170dp"
+
+        android:background="#696FEA"
+
+        ></LinearLayout>
+    <LinearLayout
+        android:layout_width="4dp"
+        android:layout_height="174dp"
+        android:layout_toRightOf="@+id/symbolView"
+        android:background="#696FEA"
+
+        ></LinearLayout>
+
+
+</RelativeLayout>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9e426a6d-6f24-4f4a-9dc9-50ce66305690" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/EntryScreenActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/res/drawable/entry.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/res/layout/activity_entry_screen.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/MapAlarmAddActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/MapAlarmAddActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/SettingsActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/SettingsActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/UserActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/oguzcanaygun/loginregister/UserActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/res/layout/activity_user.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/res/layout/activity_user.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="2ZdUXfvwCNChwhaGuHv7xGxgHOe" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "cidr.known.project.marker": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9e426a6d-6f24-4f4a-9dc9-50ce66305690" name="Changes" comment="" />
+      <created>1702751494389</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1702751494389</updated>
+    </task>
+    <servers />
+  </component>
+</project>
