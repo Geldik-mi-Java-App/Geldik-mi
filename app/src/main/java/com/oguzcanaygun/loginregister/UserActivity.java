@@ -349,7 +349,10 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
                     finish();
 
                 }
-                else if (item.getItemId()==R.id.alarms){
+                else if (item.getItemId()==R.id.profilResim){
+                    Intent intent = new Intent(UserActivity.this, SettingsActivity.class);
+                    startActivity(intent);
+                    finish();
 
                 }
                 else if (item.getItemId()==R.id.chatArchive){
@@ -489,12 +492,7 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
             startActivity(intent);
             finish();
         }
-        else if (item.getItemId()==R.id.userSettings){
-            Intent intent = new Intent(UserActivity.this, SettingsActivity.class);
-            startActivity(intent);
-            finish();
 
-        }
 
         return super.onOptionsItemSelected(item);
     }

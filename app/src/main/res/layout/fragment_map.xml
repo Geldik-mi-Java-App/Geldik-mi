@@ -20,11 +20,11 @@
         <!-- Button to find user's location -->
         <Button
             android:id="@+id/setTheAlarm"
-            android:background="@color/uygPembeSeffaf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
-            android:text="Alarmı Başlat"
-            android:onClick="setTheAlarm"/>
+            android:background="@drawable/top_background_frame"
+            android:onClick="setTheAlarm"
+            android:text="Alarmı Başlat" />
     </LinearLayout>
 </FrameLayout>

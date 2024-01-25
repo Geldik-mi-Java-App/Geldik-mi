@@ -16,9 +16,9 @@
                     android:icon="@drawable/baseline_connect_without_contact_24"
                     />
                 <item
-                    android:id="@+id/alarms"
-                    android:title="Alarmlar"
-                    android:icon="@drawable/baseline_add_alarm_24"
+                    android:id="@+id/profilResim"
+                    android:title="Profil Resmi"
+                    android:icon="@drawable/baseline_person_pin_24"
                     />
                 <item
                     android:id="@+id/chatArchive"

@@ -89,7 +89,8 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
         GridLayoutManager layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(new SettingsAdapter(this, getApplicationContext(),items));
-
+        View dummyView= new View(this);
+        selectImage(dummyView);
     }
     public void visualSet(){
         String imageUrl = user.getImageUrl(new User.ImageUrlCallback() {
@@ -173,115 +174,104 @@ public class SettingsActivity extends AppCompatActivity implements ItemClickInte
     private void showPermissionSnackbar(View view, String message){
         Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE).setAction("izin ver",v ->{
             snackbarShown=true;
+
             permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
         } ).show();
     }
 
     private void registerLauncher(){
-        activityResultLauncher= registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode()==RESULT_OK){
-                    Intent intentFromResult = result.getData();
-                    if (intentFromResult!=null) {
-                       imageData= intentFromResult.getData();
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> handleImageActivityResult(result));
 
-                        String userID = auth.getUid();
+        activityResultLauncherForSound = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> handleSoundActivityResult(result));
 
-                        storageReference.child("images/profileImages/"+userID+".jpg").putFile(imageData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                           @Override
-                           public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            StorageReference newReference = firebaseStorage.getReference("images/profileImages/"+userID+".jpg");
-                            newReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                String downloadURL= uri.toString();
-                                user.setImageUrl(downloadURL);
-
-
-                                    CollectionReference infoCollection= firebaseFirestore.collection("ProfilePic");
-                                    infoCollection.document(userID).set(user.getUserData(), SetOptions.merge()).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            Intent intent = new Intent(SettingsActivity.this, UserActivity.class);
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                            startActivity(intent);
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                                }
-                            });
-                           }
-                       }).addOnFailureListener(new OnFailureListener() {
-                           @Override
-                           public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                           }
-                       });
-                       //binding.imageView.setImageURI(imageData);  bu sekilde cekecez uri'yı ımageview'a
-
-                    }
-                }
-            }
-        });
-        activityResultLauncherForSound = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode() == RESULT_OK) {
-                    Intent intentFromResult = result.getData();
-                    if (intentFromResult != null) {
-                        soundData = intentFromResult.getData();
-                        // URI burada onu alarm sesi olarak atayacağız sonra
-
-                        if (soundData != null) {
-                            String userID = auth.getUid();
-                            StorageReference soundReference = storageReference.child("sounds/profileSounds/" + userID + ".mp3");
-
-                            soundReference.putFile(soundData).addOnSuccessListener(taskSnapshot -> {
-
-                                soundReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                                    String downloadURL = uri.toString();
-                                    user.setSoundUrl(downloadURL);
-
-                                    CollectionReference userInfoCollection = firebaseFirestore.collection("UserInfo");
-                                    userInfoCollection.document(userID).set(user.getUserData(), SetOptions.merge())
-                                            .addOnSuccessListener(aVoid -> {
-                                                // Handle success if needed
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                                            });
-
-                                });
-                            }).addOnFailureListener(e -> {
-                                // Handle the failure of the upload
-                                Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                            });
-
-                        }
-                    }
-                }
-            }
-        });
-
-
-        permissionLauncher=registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-            @Override
-            public void onActivityResult(Boolean o) {
-            if (o){
-            Intent intentToGallery= new Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            activityResultLauncher.launch(intentToGallery);
-            }
-            else {
-                Toast.makeText(SettingsActivity.this,"İzin Gerekli",Toast.LENGTH_LONG).show();
+        permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isPermissionGranted -> {
+            if (isPermissionGranted) {
+                Intent intentToGallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                activityResultLauncher.launch(intentToGallery);
+            } else {
+                Toast.makeText(SettingsActivity.this, "İzin Gerekli", Toast.LENGTH_LONG).show();
                 navigateToAppSettings();
             }
-            }
         });
+    }
+
+    private void handleImageActivityResult(ActivityResult result) {
+        Intent intent = new Intent(SettingsActivity.this, UserActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        if (result.getResultCode() == RESULT_OK) {
+            Intent intentFromResult = result.getData();
+            if (intentFromResult != null) {
+                imageData = intentFromResult.getData();
+
+                String userID = auth.getUid();
+
+                storageReference.child("images/profileImages/"+userID+".jpg").putFile(imageData)
+                        .addOnSuccessListener(taskSnapshot -> {
+                            StorageReference newReference = firebaseStorage.getReference("images/profileImages/"+userID+".jpg");
+                            newReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                                String downloadURL = uri.toString();
+                                user.setImageUrl(downloadURL);
+
+                                CollectionReference infoCollection = firebaseFirestore.collection("ProfilePic");
+                                infoCollection.document(userID).set(user.getUserData(), SetOptions.merge())
+                                        .addOnSuccessListener(unused -> startActivity(intent))
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                            startActivity(intent);
+                                        });
+                            });
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                            startActivity(intent);
+                        });
+            } else {
+                // If the result data is null, start UserActivity without handling the image
+                startActivity(intent);
+            }
+        } else {
+            // If the result code is not OK, start UserActivity without handling the image
+            startActivity(intent);
+        }
+        // Finish the SettingsActivity to prevent returning to it when the back button is pressed from UserActivity
+        finish();
+    }
+
+    private void handleSoundActivityResult(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK) {
+            Intent intentFromResult = result.getData();
+            if (intentFromResult != null) {
+                soundData = intentFromResult.getData();
+                // URI burada onu alarm sesi olarak atayacağız sonra
+
+                if (soundData != null) {
+                    String userID = auth.getUid();
+                    StorageReference soundReference = storageReference.child("sounds/profileSounds/" + userID + ".mp3");
+
+                    soundReference.putFile(soundData).addOnSuccessListener(taskSnapshot -> {
+
+                        soundReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                            String downloadURL = uri.toString();
+                            user.setSoundUrl(downloadURL);
+
+                            CollectionReference userInfoCollection = firebaseFirestore.collection("UserInfo");
+                            userInfoCollection.document(userID).set(user.getUserData(), SetOptions.merge())
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Handle success if needed
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                    });
+
+                        });
+                    }).addOnFailureListener(e -> {
+                        // Handle the failure of the upload
+                        Toast.makeText(SettingsActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                    });
+                }
+            }
+        }
     }
     private void navigateToAppSettings() {
         Intent settingsIntent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);

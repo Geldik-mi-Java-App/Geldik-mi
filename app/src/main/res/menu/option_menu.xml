@@ -4,5 +4,4 @@
     >
     <item android:id="@+id/add_alarm" android:title="Alarm Ekle"></item>
     <item android:id="@+id/permissions" android:title="İzinler"></item>
-    <item android:id="@+id/userSettings" android:title="Kullanıcı Ayarları"></item>
 </menu>

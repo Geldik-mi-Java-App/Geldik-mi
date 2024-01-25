@@ -67,8 +67,8 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
         // Build and show a notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle("Geofence Alert")
-                .setContentText("You've entered the geofence!")
+                .setContentTitle("Geldik mi")
+                .setContentText("Varış Konumunuza Ulaştınız!")
                 .setSmallIcon(R.drawable.baseline_emoji_transportation_24)
                 .setContentIntent(contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
