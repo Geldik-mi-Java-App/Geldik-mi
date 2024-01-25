@@ -83,8 +83,8 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
     private void playAlarmSound(Context context) {
         // Play a notification sound
-        Uri notificationSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Ringtone ringtone = RingtoneManager.getRingtone(context, notificationSoundUri);
+        int soundResourceId = R.raw.nokia;
+        Ringtone ringtone = RingtoneManager.getRingtone(context, Uri.parse("android.resource://" + context.getPackageName() + "/" + soundResourceId));
         ringtone.play();
     }
 

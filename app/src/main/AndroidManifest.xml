@@ -16,16 +16,13 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/geldikmikon"
+        android:label="Geldik Mi"
+        android:roundIcon="@drawable/geldikmikon"
         android:supportsRtl="true"
         android:theme="@style/Theme.LoginRegister"
         tools:targetApi="31">
-        <activity
-            android:name=".MainActivity2"
-            android:exported="false"
-            android:label="@string/title_activity_main2" />
+
         <activity
             android:name=".FriendsActivity"
             android:exported="false"
