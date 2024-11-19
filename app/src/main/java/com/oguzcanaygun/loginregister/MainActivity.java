@@ -1,5 +1,6 @@
 package com.oguzcanaygun.loginregister;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -31,11 +32,15 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = auth.getCurrentUser();
         if (user!=null){
             Intent intent = new Intent(MainActivity.this, UserActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE
+            );
             startActivity(intent);
             finish();
         }
-
-
     }
     public void loginClicked(View view){
         String email = binding.eMailAdress.getText().toString();
@@ -49,19 +54,26 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(AuthResult authResult) {
                     Intent intent = new Intent(MainActivity.this, UserActivity.class);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(
+                            MainActivity.this,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE
+                    );
                     startActivity(intent);
                     finish();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-               Toast.makeText(MainActivity.this,e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
                 }
             });
         }
     }
     public void registerClicked(View view){
         Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
         startActivity(intent);
         finish();
     }

@@ -3,6 +3,7 @@ package com.oguzcanaygun.loginregister;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -66,6 +67,12 @@ public class RegisterActivity extends AppCompatActivity {
             userInfoCollection.document(userID).set(user.getUserData(), SetOptions.merge()).addOnSuccessListener(new OnSuccessListener<Void>() {
                 public void onSuccess(Void avoid) {
                     Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(
+                            RegisterActivity.this,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE
+                    );
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
@@ -96,7 +103,13 @@ public class RegisterActivity extends AppCompatActivity {
        }
     }
     public void backToLoginClicked(View view){
-        Intent intent= new Intent(RegisterActivity.this, MainActivity.class);
+        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
         startActivity(intent);
         finish();
 

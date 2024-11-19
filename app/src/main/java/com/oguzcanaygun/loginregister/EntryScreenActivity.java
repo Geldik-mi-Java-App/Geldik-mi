@@ -2,6 +2,7 @@ package com.oguzcanaygun.loginregister;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -23,7 +24,13 @@ public class EntryScreenActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(EntryScreenActivity.this,MainActivity.class);
+                Intent intent = new Intent(EntryScreenActivity.this, MainActivity.class);
+                PendingIntent pendingIntent = PendingIntent.getActivity(
+                        EntryScreenActivity.this,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE // Flag'i buraya ekledik
+                );
                 startActivity(intent);
                 finish();
             }

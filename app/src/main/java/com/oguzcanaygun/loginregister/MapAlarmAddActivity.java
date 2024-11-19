@@ -5,6 +5,7 @@ import static androidx.core.location.LocationManagerCompat.requestLocationUpdate
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -252,6 +253,12 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
     private void navigateToAppSettings() {
         Intent settingsIntent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         settingsIntent.setData(Uri.parse("package:" + getPackageName()));
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                settingsIntent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
         startActivity(settingsIntent);
     }
     @Override
@@ -267,13 +274,18 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
         requestLocationUpdates();
     }
    public void backButton(View view){
-        Intent intent = new Intent(MapAlarmAddActivity.this, UserActivity.class);
+       Intent intent = new Intent(MapAlarmAddActivity.this, UserActivity.class);
+       PendingIntent pendingIntent = PendingIntent.getActivity(
+               this,
+               0,
+               intent,
+               PendingIntent.FLAG_IMMUTABLE
+       );
         startActivity(intent);
         finish();
    }
-   public void sendAlarm(View view){
+    public void sendAlarm(View view){
         if (circle!=null) {
-
             Intent intent = new Intent(MapAlarmAddActivity.this, UserActivity.class);
             intent.putExtra("radius", intentRadius);
             intent.putExtra("latlng", intentLatlng);
@@ -289,29 +301,30 @@ public class MapAlarmAddActivity extends FragmentActivity implements OnMapReadyC
                         public void onClick(DialogInterface dialog, int which) {
                             String alarmNameStr = nameInput.getText().toString();
                             if (!alarmNameStr.isEmpty()) {
-                            intent.putExtra("alarm_ismi", alarmNameStr);
-                            startActivity(intent);
-                            finish();
-
+                                intent.putExtra("alarm_ismi", alarmNameStr);
+                                PendingIntent pendingIntent = PendingIntent.getActivity(
+                                        MapAlarmAddActivity.this,
+                                        0,
+                                        intent,
+                                        PendingIntent.FLAG_IMMUTABLE
+                                );
+                                startActivity(intent);
+                                finish();
                             } else {
                                 Toast.makeText(getApplicationContext(),"Geçerli bir alarm ismi belirtiniz",Toast.LENGTH_SHORT).show();
                             }
-
-
                         }
                     })
                     .setNegativeButton("İptal", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
                         }
                     })
                     .show();
-
         } else if (circle==null) {
             Toast.makeText(this,"Lütfen önce ulaşmak istediğiniz alanı belirleyiniz",Toast.LENGTH_SHORT).show();
         }
-   }
+    }
 
 
 }

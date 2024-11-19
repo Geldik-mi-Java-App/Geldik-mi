@@ -345,14 +345,20 @@ public class UserActivity extends AppCompatActivity implements UserIdCallback, M
                 }
                 else if (item.getItemId()==R.id.friends){
                     Intent intent = new Intent(UserActivity.this, FriendsActivity.class);
-                    startActivity(intent);
-                    finish();
+                    PendingIntent pendingIntent = PendingIntent.getActivity(
+                            UserActivity.this,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE);
 
                 }
                 else if (item.getItemId()==R.id.profilResim){
                     Intent intent = new Intent(UserActivity.this, SettingsActivity.class);
-                    startActivity(intent);
-                    finish();
+                    PendingIntent pendingIntent = PendingIntent.getActivity(
+                            UserActivity.this,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE);
 
                 }
                 else if (item.getItemId()==R.id.chatArchive){
